@@ -4281,18 +4281,26 @@ class StockApp(MDApp):
                     icon.text_color = icon_color
                 item.add_widget(icon)
                 content_list.add_widget(item)
+
+            import webbrowser
+            add_section('APPLICATION')
+            add_option('Mise à jour', 'Télécharger la nouvelle version', 'cloud-download', lambda x: [self.settings_menu_dialog.dismiss(), webbrowser.open('https://rhseifeddine.github.io/MagPro-Standalone/')])
+
             add_section('DONNÉES & SAUVEGARDE')
             add_option('Exporter Produits', 'Direct Excel (.xlsx)', 'file-export', lambda x: self.perform_export())
             add_option('Importer Produits', 'Depuis Excel (.xlsx)', 'file-import', lambda x: [self.settings_menu_dialog.dismiss(), self.import_data_dialog()])
             add_option('Sauvegarde Locale', 'Backup complet (.db)', 'database-export', lambda x: self.perform_local_backup())
             add_option('Partager (.db)', '(Quick Share & Bluetooth)', 'cloud-upload', lambda x: self.share_database_file())
             add_option('Restaurer', 'Depuis une sauvegarde', 'backup-restore', lambda x: [self.settings_menu_dialog.dismiss(), self.show_restore_dialog()])
+            
             add_section('MAGASIN')
             add_option('Info Magasin', 'Nom, Adresse, Entête...', 'store', lambda x: self.show_store_settings_dialog(x))
+            
             add_section('IMPRIMANTE & PDF')
             printer_name = self.db.get_setting('printer_name', 'Non configurée')
             add_option('Configurer', f'Actuelle: {printer_name}', 'printer-wireless', lambda x: [self.settings_menu_dialog.dismiss(), self.open_bluetooth_selector(x)])
             add_option("Oublier l'imprimante", 'Déconnecter', 'printer-off', lambda x: self.clear_printer_selection(x), icon_color=(0.8, 0, 0, 1))
+            
             auto_layout = MDBoxLayout(orientation='horizontal', size_hint_y=None, height=dp(50), padding=(dp(20), 0))
             lbl_auto = MDLabel(text='Impression Auto (Bluetooth)', theme_text_color='Primary', size_hint_x=0.8)
             is_auto = self.db.get_setting('printer_auto', 'False') == 'True'
@@ -4301,6 +4309,7 @@ class StockApp(MDApp):
             auto_layout.add_widget(lbl_auto)
             auto_layout.add_widget(chk_auto)
             content_list.add_widget(auto_layout)
+            
             bal_layout = MDBoxLayout(orientation='horizontal', size_hint_y=None, height=dp(50), padding=(dp(20), 0))
             lbl_bal = MDLabel(text='Afficher Solde PDF (BV/BA)', theme_text_color='Primary', size_hint_x=0.8)
             is_bal = self.db.get_setting('show_balance_in_pdf', 'False') == 'True'
@@ -4309,8 +4318,10 @@ class StockApp(MDApp):
             bal_layout.add_widget(lbl_bal)
             bal_layout.add_widget(chk_bal)
             content_list.add_widget(bal_layout)
+            
             add_section('SÉCURITÉ')
             add_option('Admin / Vendeur', 'Gérer les accès', 'shield-account', lambda x: [self.settings_menu_dialog.dismiss(), self.open_seller_auth_dialog(x)])
+            
             scroll_view.add_widget(content_list)
             self.settings_menu_dialog = MDDialog(title='Paramètres', type='custom', content_cls=scroll_view, buttons=[MDFlatButton(text='FERMER', theme_text_color='Custom', text_color=self.theme_cls.primary_color, on_release=lambda x: self.settings_menu_dialog.dismiss())], size_hint=(0.96, None))
             self.settings_menu_dialog.open()
