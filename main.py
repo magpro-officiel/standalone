@@ -4284,7 +4284,7 @@ class StockApp(MDApp):
 
             import webbrowser
             add_section('APPLICATION')
-            add_option('Mise à jour', 'Télécharger la nouvelle version', 'cloud-download', lambda x: [self.settings_menu_dialog.dismiss(), webbrowser.open('https://rhseifeddine.github.io/MagPro-Standalone/')])
+            add_option('Mise à jour', 'Télécharger la nouvelle version', 'cloud-download', lambda x: [self.settings_menu_dialog.dismiss(), webbrowser.open('https://magpro-officiel.github.io/standalone/')])
 
             add_section('DONNÉES & SAUVEGARDE')
             add_option('Exporter Produits', 'Direct Excel (.xlsx)', 'file-export', lambda x: self.perform_export())
