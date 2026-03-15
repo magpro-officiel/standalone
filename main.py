@@ -3513,6 +3513,10 @@ class StockApp(MDApp):
         self._auto_login_check(0)
         self.check_and_load_stats()
         self.update_dashboard_layout()
+        
+        from kivy.clock import Clock
+        Clock.schedule_interval(self.trigger_auto_backups, 3600)
+        self.trigger_auto_backups()
 
     def select_entity_from_rv(self, entity_data):
         final_name = entity_data.get('name', '')
@@ -7067,7 +7071,6 @@ class StockApp(MDApp):
             try:
                 from jnius import autoclass
                 Environment = autoclass('android.os.Environment')
-                # حفظ الملفات في مجلد التحميلات العام لكي يراها المستخدم بسهولة
                 public_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()
                 backup_dir = os.path.join(public_dir, 'MagPro_Backups')
             except Exception as e:
@@ -7092,33 +7095,37 @@ class StockApp(MDApp):
                 return self.user_data_dir
         return backup_dir
 
-    def _rotate_backups(self, backup_dir, limit=30):
+    def _rotate_backups(self, backup_dir):
         try:
             if not os.path.exists(backup_dir):
                 return
-            files = []
-            for f in os.listdir(backup_dir):
-                if f.startswith('Backup_Auto_') and f.endswith('.zip'):
-                    full_path = os.path.join(backup_dir, f)
-                    files.append(full_path)
-            files.sort(key=os.path.getmtime)
-            while len(files) > limit:
-                file_to_remove = files.pop(0)
-                try:
-                    os.remove(file_to_remove)
-                    print(f'[INFO] Cleaning up old backup: {file_to_remove}')
-                except Exception as e:
-                    print(f'[WARN] Failed to delete old backup: {e}')
+            
+            all_files = os.listdir(backup_dir)
+            
+            daily_files = [os.path.join(backup_dir, f) for f in all_files if f.startswith('Backup_Daily_') and f.endswith('.zip')]
+            daily_files.sort(key=os.path.getmtime)
+            while len(daily_files) > 30:
+                os.remove(daily_files.pop(0))
+                
+            rolling_files = [os.path.join(backup_dir, f) for f in all_files if f.startswith('Backup_Rolling_') and f.endswith('.zip')]
+            rolling_files.sort(key=os.path.getmtime)
+            while len(rolling_files) > 10:
+                os.remove(rolling_files.pop(0))
+                
         except Exception as e:
             print(f'[ERROR] Backup rotation failed: {e}')
 
-    def perform_local_backup(self, auto=False):
+    def perform_local_backup(self, backup_type='manual'):
         try:
             backup_dir = self.get_backup_directory()
-            if auto:
-                filename = f"Backup_Auto_{datetime.now().strftime('%Y-%m-%d')}.zip"
+            now = datetime.now()
+            
+            if backup_type == 'daily':
+                filename = f"Backup_Daily_{now.strftime('%Y-%m-%d')}.zip"
+            elif backup_type == 'rolling':
+                filename = f"Backup_Rolling_{now.strftime('%Y-%m-%d_%H-%M-%S')}.zip"
             else:
-                filename = f"MagPro_Backup_{datetime.now().strftime('%Y-%m-%d_%H-%M')}.zip"
+                filename = f"MagPro_Backup_{now.strftime('%Y-%m-%d_%H-%M-%S')}.zip"
                 
             backup_path = os.path.join(backup_dir, filename)
             
@@ -7147,7 +7154,7 @@ class StockApp(MDApp):
                     self.db.conn.execute(f"VACUUM INTO '{temp_db_source}'")
                 db_copied = True
             except Exception as vacuum_err:
-                print(f"[WARN] VACUUM INTO failed ({vacuum_err}), falling back to shutil")
+                print(f"[WARN] VACUUM INTO failed, falling back to shutil")
                 try:
                     if self.db:
                         self.db.clean_up_wal()
@@ -7186,19 +7193,23 @@ class StockApp(MDApp):
                 except:
                     pass
                     
-            if auto:
-                self._rotate_backups(backup_dir, limit=30)
+            self._rotate_backups(backup_dir)
                 
-            if not auto:
+            if backup_type == 'manual':
                 self.notify(f'Sauvegarde réussie dans:\n{backup_dir}\n{filename}', 'success')
                 if platform != 'android':
                     import subprocess
                     subprocess.Popen(f'explorer /select,"{backup_path}"')
                     
         except Exception as e:
-            if not auto:
+            if backup_type == 'manual':
                 self.notify(f'Échec de la sauvegarde: {e}', 'error')
             print(f'Backup Error: {e}')
+
+    def trigger_auto_backups(self, dt=None):
+        self.perform_local_backup(backup_type='daily')
+        self.perform_local_backup(backup_type='rolling')
+        print("[INFO] Sauvegarde automatique terminée (Daily + Rolling).")
 
     def show_restore_dialog(self):
         if platform == 'android':
@@ -7382,9 +7393,10 @@ class StockApp(MDApp):
         try:
             print("[INFO] Arrêt de l'application...")
             try:
-                self.perform_local_backup(auto=True)
+                self.trigger_auto_backups()
             except Exception as backup_error:
-                print(f'[ERROR] Auto-backup failed: {backup_error}')
+                print(f'[ERROR] Auto-backup on stop failed: {backup_error}')
+                
             if hasattr(self, 'db') and self.db:
                 if self.db.conn:
                     self.db.close()
