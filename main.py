@@ -774,9 +774,17 @@ class DatabaseManager:
         else:
             date_str = datetime.now().strftime('%Y-%m-%d')
         conn = self.get_connection()
-        stats = {'sales': Decimal('0.00'), 'purchases': Decimal('0.00'), 'profit': Decimal('0.00'), 'cash_in': Decimal('0.00'), 'cash_out': Decimal('0.00'), 'stock_value': Decimal('0.00')}
+        stats = {'sales': Decimal('0.00'), 'purchases': Decimal('0.00'), 'profit': Decimal('0.00'), 'cash_in': Decimal('0.00'), 'cash_out': Decimal('0.00'), 'stock_value': Decimal('0.00'), 'client_debts': Decimal('0.00'), 'supplier_dues': Decimal('0.00')}
         try:
             cursor = conn.cursor()
+            cursor.execute('SELECT SUM(balance) FROM clients')
+            c_row = cursor.fetchone()
+            if c_row and c_row[0]:
+                stats['client_debts'] = to_decimal(c_row[0])
+            cursor.execute('SELECT SUM(balance) FROM suppliers')
+            s_row = cursor.fetchone()
+            if s_row and s_row[0]:
+                stats['supplier_dues'] = to_decimal(s_row[0])
             cursor.execute('SELECT stock, stock_warehouse, purchase_price FROM products')
             stock_rows = cursor.fetchall()
             for p in stock_rows:
@@ -1405,7 +1413,7 @@ class DatabaseManager:
         finally:
             conn.close()
 
-    def get_transactions(self, target_date=None, entity_id=None, entity_category=None, limit=50, offset=0):
+    def get_transactions(self, target_date=None, entity_id=None, entity_category=None, limit=50, offset=0, doc_type_filter='TOUS'):
         conn = self.get_connection()
         try:
             cursor = conn.cursor()
@@ -1424,6 +1432,24 @@ class DatabaseManager:
                     db_cat = 'client'
                 query += ' AND entity_category = ?'
                 params.append(db_cat)
+            if doc_type_filter and doc_type_filter != 'TOUS':
+                if doc_type_filter == 'BV':
+                    query += " AND transaction_type IN ('BV', 'SALE')"
+                elif doc_type_filter == 'BA':
+                    query += " AND transaction_type IN ('BA', 'PURCHASE')"
+                elif doc_type_filter == 'FC':
+                    query += " AND transaction_type IN ('FC', 'INVOICE_SALE')"
+                elif doc_type_filter == 'FF':
+                    query += " AND transaction_type IN ('FF', 'INVOICE_PURCHASE')"
+                elif doc_type_filter == 'RC':
+                    query += " AND transaction_type IN ('RC', 'RETURN_SALE')"
+                elif doc_type_filter == 'RF':
+                    query += " AND transaction_type IN ('RF', 'RETURN_PURCHASE')"
+                elif doc_type_filter == 'TR':
+                    query += " AND transaction_type IN ('TR', 'TRANSFER')"
+                else:
+                    query += ' AND transaction_type = ?'
+                    params.append(doc_type_filter)
             query += ' ORDER BY id DESC LIMIT ? OFFSET ?'
             params.append(limit)
             params.append(offset)
@@ -3539,6 +3565,10 @@ class StockApp(MDApp):
                     self.lbl_new_profit.text_color = (0.8, 0, 0, 1)
                 else:
                     self.lbl_new_profit.text_color = (0, 0.5, 0.5, 1)
+            if hasattr(self, 'lbl_new_client_debts') and self.lbl_new_client_debts:
+                self.lbl_new_client_debts.text = fmt(stats.get('client_debts', 0)) + ' DA'
+            if hasattr(self, 'lbl_new_supplier_dues') and self.lbl_new_supplier_dues:
+                self.lbl_new_supplier_dues.text = fmt(stats.get('supplier_dues', 0)) + ' DA'
         except Exception as e:
             print(f'Error UI stats: {e}')
 
@@ -3812,6 +3842,8 @@ class StockApp(MDApp):
         if not self.is_seller_mode:
             stats_grid.add_widget(create_modern_stat_card('package-variant', 'Valeur Stock', 'lbl_new_stock_val', (1, 0.95, 0.8, 1), (0.8, 0.4, 0, 1)))
             stats_grid.add_widget(create_modern_stat_card('chart-line', 'Bénéfice', 'lbl_new_profit', (0.95, 0.9, 1, 1), (0.5, 0, 0.5, 1)))
+            stats_grid.add_widget(create_modern_stat_card('account-cash', 'Créances Clients', 'lbl_new_client_debts', (0.9, 1, 0.9, 1), (0, 0.6, 0, 1)))
+            stats_grid.add_widget(create_modern_stat_card('account-credit-card', 'Dettes Fourniss.', 'lbl_new_supplier_dues', (1, 0.85, 0.85, 1), (0.8, 0, 0, 1)))
         self.stats_card_container.add_widget(stats_grid)
         self.check_and_load_stats()
 
@@ -4268,60 +4300,55 @@ class StockApp(MDApp):
             if hasattr(self, 'settings_menu_dialog') and self.settings_menu_dialog:
                 self.settings_menu_dialog.dismiss()
             scroll_view = MDScrollView(size_hint_y=None, height=dp(600))
-            content_list = MDList()
+            content_list = MDBoxLayout(orientation='vertical', adaptive_height=True, padding=[0, dp(10), 0, dp(10)])
 
             def add_section(text):
                 lbl = MDLabel(text=text, theme_text_color='Custom', text_color=self.theme_cls.primary_color, font_style='Subtitle2', bold=True, size_hint_y=None, height=dp(40), padding=(dp(20), dp(10)))
                 content_list.add_widget(lbl)
 
             def add_option(title, details, icon_name, action_callback, icon_color=None):
-                item = TwoLineAvatarIconListItem(text=title, secondary_text=details, on_release=action_callback)
-                icon = IconLeftWidget(icon=icon_name)
-                if icon_color:
-                    icon.text_color = icon_color
-                item.add_widget(icon)
-                content_list.add_widget(item)
-
+                card = MDCard(orientation='horizontal', size_hint_y=None, adaptive_height=True, padding=[dp(20), dp(15), dp(20), dp(15)], spacing=dp(20), md_bg_color=(0, 0, 0, 0), elevation=0, ripple_behavior=True)
+                card.bind(on_release=action_callback)
+                icon_col = icon_color if icon_color else (0.4, 0.4, 0.4, 1)
+                icon = MDIcon(icon=icon_name, theme_text_color='Custom', text_color=icon_col, font_size='24sp', pos_hint={'center_y': 0.5})
+                text_box = MDBoxLayout(orientation='vertical', adaptive_height=True, pos_hint={'center_y': 0.5}, spacing=dp(2))
+                lbl_title = MDLabel(text=title, font_style='Subtitle1', theme_text_color='Primary', adaptive_height=True, shorten=False)
+                lbl_details = MDLabel(text=details, font_style='Caption', theme_text_color='Secondary', adaptive_height=True, shorten=False)
+                text_box.add_widget(lbl_title)
+                text_box.add_widget(lbl_details)
+                card.add_widget(icon)
+                card.add_widget(text_box)
+                content_list.add_widget(card)
             import webbrowser
             add_section('APPLICATION')
             add_option('Mise à jour', 'Télécharger la nouvelle version', 'cloud-download', lambda x: [self.settings_menu_dialog.dismiss(), webbrowser.open('https://magpro-officiel.github.io/standalone/')])
-
             add_section('DONNÉES & SAUVEGARDE')
             add_option('Exporter Produits', 'Direct Excel (.xlsx)', 'file-export', lambda x: self.perform_export())
             add_option('Importer Produits', 'Depuis Excel (.xlsx)', 'file-import', lambda x: [self.settings_menu_dialog.dismiss(), self.import_data_dialog()])
             add_option('Sauvegarde Locale', 'Backup complet (.db)', 'database-export', lambda x: self.perform_local_backup())
             add_option('Partager (.db)', '(Quick Share & Bluetooth)', 'cloud-upload', lambda x: self.share_database_file())
             add_option('Restaurer', 'Depuis une sauvegarde', 'backup-restore', lambda x: [self.settings_menu_dialog.dismiss(), self.show_restore_dialog()])
-            
             add_section('MAGASIN')
             add_option('Info Magasin', 'Nom, Adresse, Entête...', 'store', lambda x: self.show_store_settings_dialog(x))
-            
             add_section('IMPRIMANTE & PDF')
             printer_name = self.db.get_setting('printer_name', 'Non configurée')
             add_option('Configurer', f'Actuelle: {printer_name}', 'printer-wireless', lambda x: [self.settings_menu_dialog.dismiss(), self.open_bluetooth_selector(x)])
             add_option("Oublier l'imprimante", 'Déconnecter', 'printer-off', lambda x: self.clear_printer_selection(x), icon_color=(0.8, 0, 0, 1))
-            
-            auto_layout = MDBoxLayout(orientation='horizontal', size_hint_y=None, height=dp(50), padding=(dp(20), 0))
-            lbl_auto = MDLabel(text='Impression Auto (Bluetooth)', theme_text_color='Primary', size_hint_x=0.8)
+
+            def add_checkbox_option(text, is_active, callback):
+                card = MDCard(orientation='horizontal', size_hint_y=None, adaptive_height=True, padding=[dp(20), dp(10), dp(20), dp(10)], spacing=dp(10), md_bg_color=(0, 0, 0, 0), elevation=0)
+                lbl = MDLabel(text=text, theme_text_color='Primary', adaptive_height=True, shorten=False, pos_hint={'center_y': 0.5})
+                chk = MDCheckbox(active=is_active, size_hint=(None, None), size=(dp(48), dp(48)), pos_hint={'center_y': 0.5})
+                chk.bind(active=callback)
+                card.add_widget(lbl)
+                card.add_widget(chk)
+                content_list.add_widget(card)
             is_auto = self.db.get_setting('printer_auto', 'False') == 'True'
-            chk_auto = MDCheckbox(active=is_auto, size_hint=(None, None), size=(dp(40), dp(40)), pos_hint={'center_y': 0.5})
-            chk_auto.bind(active=self.toggle_auto_print)
-            auto_layout.add_widget(lbl_auto)
-            auto_layout.add_widget(chk_auto)
-            content_list.add_widget(auto_layout)
-            
-            bal_layout = MDBoxLayout(orientation='horizontal', size_hint_y=None, height=dp(50), padding=(dp(20), 0))
-            lbl_bal = MDLabel(text='Afficher Solde PDF (BV/BA)', theme_text_color='Primary', size_hint_x=0.8)
+            add_checkbox_option('Impression Auto (Bluetooth)', is_auto, self.toggle_auto_print)
             is_bal = self.db.get_setting('show_balance_in_pdf', 'False') == 'True'
-            chk_bal = MDCheckbox(active=is_bal, size_hint=(None, None), size=(dp(40), dp(40)), pos_hint={'center_y': 0.5})
-            chk_bal.bind(active=self.toggle_pdf_balance)
-            bal_layout.add_widget(lbl_bal)
-            bal_layout.add_widget(chk_bal)
-            content_list.add_widget(bal_layout)
-            
+            add_checkbox_option('Afficher Solde PDF (BV/BA)', is_bal, self.toggle_pdf_balance)
             add_section('SÉCURITÉ')
             add_option('Admin / Vendeur', 'Gérer les accès', 'shield-account', lambda x: [self.settings_menu_dialog.dismiss(), self.open_seller_auth_dialog(x)])
-            
             scroll_view.add_widget(content_list)
             self.settings_menu_dialog = MDDialog(title='Paramètres', type='custom', content_cls=scroll_view, buttons=[MDFlatButton(text='FERMER', theme_text_color='Custom', text_color=self.theme_cls.primary_color, on_release=lambda x: self.settings_menu_dialog.dismiss())], size_hint=(0.96, None))
             self.settings_menu_dialog.open()
@@ -5583,11 +5610,21 @@ class StockApp(MDApp):
         grid = MDGridLayout(cols=3, spacing='10dp', size_hint_y=1, padding=[dp(20), dp(10)])
         keys = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '-', '0', '.']
         for key in keys:
-            btn = MDRaisedButton(text=key, md_bg_color=(0.96, 0.96, 0.96, 1), theme_text_color='Custom', text_color=(0.1, 0.1, 0.1, 1), font_size='28sp', elevation=1, size_hint=(1, 1), on_release=lambda x, k=key: add_digit(k))
             if key == '-':
-                btn.font_size = '38sp'
-                btn.text_color = (0, 0, 0, 1)
-            grid.add_widget(btn)
+                btn = MDCard(md_bg_color=(1.0, 0.85, 0.85, 1), elevation=1, size_hint=(1, 1), radius=[4], ripple_behavior=True, padding=0)
+                btn.bind(on_release=lambda x, k=key: add_digit(k))
+                float_container = MDFloatLayout(size_hint=(1, 1))
+                content_box = MDBoxLayout(orientation='vertical', adaptive_size=True, pos_hint={'center_x': 0.5, 'center_y': 0.5}, spacing=dp(2))
+                icon_minus = MDIcon(icon='minus-thick', font_size='32sp', halign='center', theme_text_color='Custom', text_color=(0.8, 0, 0, 1), pos_hint={'center_x': 0.5})
+                lbl_text = MDLabel(text='Solde initial', font_style='Caption', halign='center', theme_text_color='Custom', text_color=(0.8, 0, 0, 1), adaptive_size=True, pos_hint={'center_x': 0.5})
+                content_box.add_widget(icon_minus)
+                content_box.add_widget(lbl_text)
+                float_container.add_widget(content_box)
+                btn.add_widget(float_container)
+                grid.add_widget(btn)
+            else:
+                btn = MDRaisedButton(text=key, md_bg_color=(0.96, 0.96, 0.96, 1), theme_text_color='Custom', text_color=(0.1, 0.1, 0.1, 1), font_size='28sp', elevation=1, size_hint=(1, 1), on_release=lambda x, k=key: add_digit(k))
+                grid.add_widget(btn)
         content.add_widget(grid)
         buttons_box = MDBoxLayout(orientation='horizontal', spacing='10dp', size_hint_y=None, height='70dp', padding=[0, '10dp', 0, 0])
         btn_cancel = MDFlatButton(text='ANNULER', theme_text_color='Custom', text_color=(0.5, 0.5, 0.5, 1), size_hint_x=0.25, on_release=lambda x: self.simple_pay_dialog.dismiss())
@@ -6329,7 +6366,17 @@ class StockApp(MDApp):
             traceback.print_exc()
 
     def show_pending_dialog(self):
+        self.current_history_filter = 'TOUS'
+        custom_title = MDBoxLayout(orientation='horizontal', adaptive_height=True, padding=[0, 0, 0, dp(10)])
+        lbl_title = MDLabel(text='Historique', font_style='H6', bold=True, theme_text_color='Primary', size_hint_x=0.6, valign='center')
+        self.btn_hist_filter = MDFillRoundFlatButton(text='FILTRE: Tous', md_bg_color=(0.3, 0.3, 0.3, 1), text_color=(1, 1, 1, 1), size_hint_x=0.4, pos_hint={'center_y': 0.5}, on_release=self.open_history_filter_dialog)
+        custom_title.add_widget(lbl_title)
+        custom_title.add_widget(self.btn_hist_filter)
         content = MDBoxLayout(orientation='vertical', size_hint_y=None, height=dp(550))
+        content.add_widget(custom_title)
+        from kivymd.uix.card import MDSeparator
+        content.add_widget(MDSeparator(height=dp(1), color=(0.9, 0.9, 0.9, 1)))
+        content.add_widget(MDBoxLayout(size_hint_y=None, height=dp(10)))
         tabs_box = MDBoxLayout(orientation='horizontal', size_hint_y=None, height=dp(50), spacing=5)
         self.btn_hist_today = MDRaisedButton(text='AUJ.', size_hint_x=0.33, elevation=0, on_release=lambda x: self.filter_history_list(day_offset=0))
         self.btn_hist_yesterday = MDRaisedButton(text='HIER', size_hint_x=0.33, elevation=0, md_bg_color=(0.5, 0.5, 0.5, 1), on_release=lambda x: self.filter_history_list(day_offset=1))
@@ -6340,9 +6387,38 @@ class StockApp(MDApp):
         content.add_widget(tabs_box)
         self.rv_history = HistoryRecycleView()
         content.add_widget(self.rv_history)
-        self.pending_dialog = MDDialog(title='Historique', type='custom', content_cls=content, size_hint=(0.98, 0.98))
+        self.pending_dialog = MDDialog(title='', type='custom', content_cls=content, size_hint=(0.98, 0.98))
         self.pending_dialog.open()
         self.filter_history_list(day_offset=0)
+
+    def open_history_filter_dialog(self, instance):
+        content = MDBoxLayout(orientation='vertical', size_hint_y=None, adaptive_height=True)
+        scroll = MDScrollView(size_hint_y=None, height=dp(400))
+        list_layout = MDBoxLayout(orientation='vertical', adaptive_height=True)
+        filters = [('TOUS', 'Tous'), ('BV', 'Vente (BV)'), ('BA', 'Achat (BA)'), ('FC', 'Facture (FC)'), ('FF', 'Facture Achat (FF)'), ('RC', 'Retour Client (RC)'), ('RF', 'Retour Fourn. (RF)'), ('CLIENT_PAY', 'Versement (Client)'), ('SUPPLIER_PAY', 'Règlement (Fournisseur)'), ('TR', 'Transfert (TR)'), ('BI', 'Stock Initial (BI)'), ('FP', 'Proforma (FP)'), ('DP', 'Commande (DP)')]
+        for code, name in filters:
+            btn = MDCard(size_hint_y=None, height=dp(50), md_bg_color=(0, 0, 0, 0), elevation=0, ripple_behavior=True, radius=[0])
+            lbl = MDLabel(text=name, halign='center', valign='center', font_style='Subtitle1', theme_text_color='Custom', text_color=(0.2, 0.2, 0.2, 1) if code != self.current_history_filter else (0, 0.6, 0, 1))
+            btn.add_widget(lbl)
+            btn.bind(on_release=lambda x, c=code, n=name: self.apply_history_filter(c, n))
+            list_layout.add_widget(btn)
+            from kivymd.uix.card import MDSeparator
+            list_layout.add_widget(MDSeparator(height=dp(1), color=(0.9, 0.9, 0.9, 1)))
+        scroll.add_widget(list_layout)
+        content.add_widget(scroll)
+        self.history_filter_dialog = MDDialog(title='Filtrer par type', type='custom', content_cls=content, size_hint=(0.85, None))
+        self.history_filter_dialog.open()
+
+    def apply_history_filter(self, code, name):
+        self.current_history_filter = code
+        short_name = name.split(' ')[0] if code != 'TOUS' else 'Tous'
+        self.btn_hist_filter.text = f'FILTRE: {short_name}'
+        self.history_filter_dialog.dismiss()
+        self.history_page_offset = 0
+        if self.rv_history:
+            self.rv_history.data = []
+            self.rv_history.refresh_from_data()
+        self.load_more_history()
 
     def filter_history_list(self, day_offset=None, specific_date=None):
         inactive_color = (0.5, 0.5, 0.5, 1)
@@ -6383,7 +6459,8 @@ class StockApp(MDApp):
         threading.Thread(target=self._history_worker).start()
 
     def _history_worker(self):
-        new_transactions = self.db.get_transactions(target_date=self.history_view_date, limit=self.history_batch_size, offset=self.history_page_offset)
+        filter_val = getattr(self, 'current_history_filter', 'TOUS')
+        new_transactions = self.db.get_transactions(target_date=self.history_view_date, limit=self.history_batch_size, offset=self.history_page_offset, doc_type_filter=filter_val)
         Clock.schedule_once(lambda dt: self._append_history_data(new_transactions))
 
     def _append_history_data(self, transactions):
@@ -7012,7 +7089,7 @@ class StockApp(MDApp):
         try:
             files = []
             for f in os.listdir(backup_dir):
-                if f.startswith('Backup_Auto_') and f.endswith('.db'):
+                if f.startswith('Backup_Auto_') and f.endswith('.zip'):
                     full_path = os.path.join(backup_dir, f)
                     files.append(full_path)
             files.sort(key=os.path.getmtime)
@@ -7020,10 +7097,6 @@ class StockApp(MDApp):
                 file_to_remove = files.pop(0)
                 try:
                     os.remove(file_to_remove)
-                    if os.path.exists(file_to_remove + '-wal'):
-                        os.remove(file_to_remove + '-wal')
-                    if os.path.exists(file_to_remove + '-shm'):
-                        os.remove(file_to_remove + '-shm')
                     print(f'[INFO] Cleaning up old backup: {file_to_remove}')
                 except Exception as e:
                     print(f'[WARN] Failed to delete old backup: {e}')
@@ -7032,12 +7105,12 @@ class StockApp(MDApp):
 
     def perform_local_backup(self, auto=False):
         try:
+            backup_dir = self.get_backup_directory()
             if auto:
-                filename = f"AutoBackup_{datetime.now().strftime('%Y-%m-%d')}.zip"
+                filename = f"Backup_Auto_{datetime.now().strftime('%Y-%m-%d')}.zip"
             else:
                 filename = f"MagPro_Backup_{datetime.now().strftime('%Y-%m-%d_%H-%M')}.zip"
-            backup_path = self.get_unified_path(filename)
-            backup_dir = os.path.dirname(backup_path)
+            backup_path = os.path.join(backup_dir, filename)
             if not os.path.exists(backup_dir):
                 os.makedirs(backup_dir)
             if os.path.exists(backup_path):
@@ -7065,6 +7138,8 @@ class StockApp(MDApp):
                             zipf.write(file_path, arcname=arcname)
             if os.path.exists(temp_db_source):
                 os.remove(temp_db_source)
+            if auto:
+                self._rotate_backups(backup_dir, limit=30)
             if not auto:
                 self.notify(f'Sauvegarde réussie (DB+Images):\n{filename}', 'success')
                 if platform != 'android':
@@ -7256,6 +7331,10 @@ class StockApp(MDApp):
     def on_stop(self):
         try:
             print("[INFO] Arrêt de l'application...")
+            try:
+                self.perform_local_backup(auto=True)
+            except Exception as backup_error:
+                print(f'[ERROR] Auto-backup failed: {backup_error}')
             if hasattr(self, 'db') and self.db:
                 if self.db.conn:
                     self.db.close()
