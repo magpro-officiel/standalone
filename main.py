@@ -5620,7 +5620,7 @@ class StockApp(MDApp):
                 float_container = MDFloatLayout(size_hint=(1, 1))
                 content_box = MDBoxLayout(orientation='vertical', adaptive_size=True, pos_hint={'center_x': 0.5, 'center_y': 0.5}, spacing=dp(2))
                 icon_minus = MDIcon(icon='minus-thick', font_size='32sp', halign='center', theme_text_color='Custom', text_color=(0.8, 0, 0, 1), pos_hint={'center_x': 0.5})
-                lbl_text = MDLabel(text='Solde initial', font_style='Caption', halign='center', theme_text_color='Custom', text_color=(0.8, 0, 0, 1), adaptive_size=True, pos_hint={'center_x': 0.5})
+                lbl_text = MDLabel(text='Crédit Initial', font_style='Caption', halign='center', theme_text_color='Custom', text_color=(0.8, 0, 0, 1), adaptive_size=True, pos_hint={'center_x': 0.5})
                 content_box.add_widget(icon_minus)
                 content_box.add_widget(lbl_text)
                 float_container.add_widget(content_box)
