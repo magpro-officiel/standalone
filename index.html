@@ -1,78 +1,1300 @@
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MagPro Standalone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta property="og:title" content="MagPro">
+    <title>MagPro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #f9fafb; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 1rem; }
-        .mobile-card { width: 100%; max-width: 400px; }
-        .hover-lift { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; }
-        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
-            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { visibility: hidden; }
+        html[dir="ltr"] body { font-family: 'Poppins', sans-serif; }
+        html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+        html[dir="rtl"] .hero-title-spacing { line-height: 1.4 !important; }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+
+        .hero-section {
+            padding-top: 120px !important;
+            padding-bottom: 100px !important;
+            overflow: hidden;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        @media (min-width: 768px) {
+            .hero-section {
+                padding-top: 160px !important;
+                padding-bottom: 140px !important;
+            }
+        }
+
+        /* Animated hero background */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 40%, rgba(37,99,235,0.35) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 70%, rgba(16,185,129,0.2) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 50% 10%, rgba(99,102,241,0.2) 0%, transparent 60%);
+            animation: hero-bg-shift 10s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        /* Floating orbs */
+        .hero-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.18;
+            pointer-events: none;
+            animation: orb-float 8s ease-in-out infinite;
+        }
+        .hero-orb-1 { width: 500px; height: 500px; background: #3b82f6; top: -100px; right: -100px; animation-delay: 0s; }
+        .hero-orb-2 { width: 400px; height: 400px; background: #10b981; bottom: -80px; left: -80px; animation-delay: -4s; }
+        .hero-orb-3 { width: 300px; height: 300px; background: #8b5cf6; top: 40%; left: 30%; animation-delay: -2s; opacity: 0.1; }
+
+        /* Grid pattern overlay */
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        @keyframes hero-bg-shift {
+            0%   { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.08); }
+        }
+
+        @keyframes orb-float {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50%       { transform: translateY(-30px) scale(1.05); }
+        }
+
+        /* Stats badges */
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.85);
+            transition: all 0.3s ease;
+        }
+        .hero-badge:hover {
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        .hero-badge .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* Scroll indicator */
+        .hero-scroll {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            opacity: 0.4;
+            animation: scroll-bounce 2s ease-in-out infinite;
+        }
+        @keyframes scroll-bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50%       { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* Gradient text animated */
+        .gradient-text-animated {
+            background: linear-gradient(90deg, #38bdf8, #34d399, #818cf8, #38bdf8);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 5s linear infinite;
+        }
+        @keyframes gradient-shift {
+            0%   { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        /* CTA button shine */
+        .hero-cta {
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-cta::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: skewX(-20deg);
+            animation: cta-shine 4s ease-in-out infinite;
+        }
+        @keyframes cta-shine {
+            0%   { left: -60%; }
+            40%, 100% { left: 130%; }
+        }
+
+        #featureModal { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #featureModal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        #featureModal:not(.hidden) { opacity: 1; visibility: visible; pointer-events: auto; }
+        .modal-content { transform: scale(0.95); transition: transform 0.3s ease; }
+        #featureModal:not(.hidden) .modal-content { transform: scale(1); }
+
+        #backToTop {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+        }
+        #backToTop.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+        @keyframes pulse-glow {
+            0%   { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); }
+            70%  { box-shadow: 0 0 0 20px rgba(59,130,246,0); }
+            100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+        }
+        @keyframes fadeInUp {
+            0%   { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes yt-btn-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.7); }
+            50%       { box-shadow: 0 0 0 12px rgba(220,38,38,0); }
+        }
+
+        .animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.25,0.8,0.25,1) forwards; }
+        .hover-lift { transition: transform 0.3s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .pulse-btn { animation: pulse-glow 2s infinite; }
+
+        #mobileMenu { transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobileMenu.open { max-height: 500px; opacity: 1; }
+
+        nav { transition: background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease; }
+        nav.scrolled {
+            background: rgba(255,255,255,0.92) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.07) !important;
+        }
+        .nav-link { position: relative; padding-bottom: 2px; }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+            height: 2px; background: #2563eb; border-radius: 2px;
+            transform: scaleX(0); transition: transform 0.25s ease;
+        }
+        .nav-link:hover::after { transform: scaleX(1); }
+
+
+        /* RTL: flip logo position in navbar and footer */
+        html[dir="rtl"] .nav-logo-wrap { flex-direction: row-reverse; }
+        html[dir="rtl"] .footer-logo-wrap { flex-direction: row-reverse; }
+        img, iframe, video { max-width: 100%; }
+        a, button { touch-action: manipulation; }
+        * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        input, textarea { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800" oncontextmenu="return false;" oncopy="return false;" oncut="return false;">
 
     <script>
-        const APP_DATA = {
-            VERSION: "7.1.0",
-            DATE: "15 Mars 2026",
-            LINK: "https://www.mediafire.com/file/do7mx77ccg7lcfk/MagPro_Standalone_v7.1.0.apk/file"
-        };
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'u' || e.key === 's' || e.key === 'a' || e.key === 'p')) {
+                e.preventDefault();
+            }
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
+                e.preventDefault();
+            }
+        });
+
+        function openFeatureModalWithHistory(key) {
+            history.pushState({ modal: key }, '');
+            openFeatureModal(key);
+        }
+
+        window.addEventListener('popstate', function(e) {
+            if (!document.getElementById('featureModal').classList.contains('hidden')) {
+                closeFeatureModal();
+            }
+        });
     </script>
 
-    <div class="mobile-card bg-white p-6 rounded-3xl shadow-lg border-t-8 border-purple-500 hover-lift flex flex-col relative group">
-        <div class="flex items-center gap-4 mb-8">
-            <div class="w-14 h-14 bg-purple-50 text-purple-600 flex items-center justify-center rounded-2xl text-2xl shrink-0 group-hover:bg-purple-600 group-hover:text-white transition shadow-sm">
-                <i class="fa-solid fa-mobile-screen-button"></i>
-            </div>
-            <div class="overflow-hidden">
-                <h3 class="font-bold text-gray-900 leading-tight text-base whitespace-nowrap">MagPro Standalone</h3>
-                <span class="inline-block mt-1 bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-md">v<span id="app-version"></span></span>
+    <script>
+        const APP_CONFIG = {
+            CONTACT: {
+                PHONE: "0770 72 71 67",
+                FACEBOOK: "https://web.facebook.com/magpro.officiel"
+            },
+            WINDOWS: {
+                VERSION: "7.1.0.0",
+                DATE: "13 Mars 2026",
+                DATE_AR: "13 مارس 2026",
+                LINK: "https://www.mediafire.com/file/16pg1vluimqmrm8/MagPro_v7.1.0.0.exe/file"
+            },
+            ANDROID: {
+                FLOTTE: {
+                    VERSION: "7.1.0",
+                    DATE: "10 Mars 2026",
+                    DATE_AR: "10 مارس 2026",
+                    LINK: "https://www.mediafire.com/file/g9o82vya0gjvnsp/MagPro_Vendeur_v7.1.0.apk/file"
+                },
+                SCALE: {
+                    VERSION: "7.1.0",
+                    DATE: "10 Mars 2026",
+                    DATE_AR: "10 مارس 2026",
+                    LINK: "https://www.mediafire.com/file/iw6hzasrhrvkpyj/MagPro_Scale_v7.1.0.apk/file"
+                },
+                RESTO: {
+                    VERSION: "7.1.0",
+                    DATE: "10 Mars 2026",
+                    DATE_AR: "10 مارس 2026",
+                    LINK: "https://www.mediafire.com/file/g7c9s94z5y76ljh/MagPro_Resto_v7.1.0.apk/file"
+                },
+                STANDALONE: {
+                    VERSION: "7.1.0",
+                    DATE: "15 Mars 2026",
+                    DATE_AR: "15 مارس 2026",
+                    LINK: "https://www.mediafire.com/file/r151vdlt5jxd16k/MagPro_Standalone_v7.1.0.apk/file"
+                }
+            }
+        };
+
+        const translations = {
+            ar: {
+                nav_features: "المميزات",
+                nav_pc: "Windows PC",
+                nav_apps: "تطبيقات Android",
+                nav_install: "دليل التثبيت",
+                nav_contact: "اتصل بنا",
+                hero_title1: "الحل النهائي لإدارة",
+                hero_title2: "تجارتك",
+                hero_desc: "سواء كنت تدير محلاً تجارياً، مطعماً أو شبكة توزيع — MagPro هو الحل الأمثل لفوترتك وتسيير مخزونك.",
+                hero_badge1: "مخزون ذكي",
+                hero_badge2: "فواتير احترافية",
+                hero_badge3: "🔥 تجربة 7 أيام مجانية",
+                hero_badge4: "يعمل بدون إنترنت",
+                hero_cta_download: "تحميل المجاني",
+                hero_cta_features: "اكتشف المميزات",
+                hero_stat1: "تجربة مجانية",
+                hero_stat1_unit: "أيام",
+                hero_stat2: "محل · مطعم · توزيع",
+                hero_stat2_unit: "أنظمة",
+                hero_stat3: "دعم فني متواصل",
+                hero_stat3_unit: "دعم",
+                feat_title_prefix: "اكتشف قوة ",
+                feat_desc: "اضغط على أي قسم لاكتشاف خصائصه المستخرجة من تقنياتنا.",
+                feat_card1_title: "المحلات التجارية والجملة",
+                feat_card1_desc: "تسيير أسعار متعددة (تجزئة، نصف جملة، جملة). دعم الباركود، الميزان، وتسيير متقدم للمخزون.",
+                feat_card1_link: "لمعرفة المزيد",
+                feat_card2_title: "المطاعم والمقاهي",
+                feat_card2_desc: "مخطط طاولات تفاعلي. طباعة مباشرة في المطبخ. منيو رقمي (QR Code). تسيير الإضافات.",
+                feat_card2_link: "لمعرفة المزيد",
+                feat_card3_title: "التوزيع",
+                feat_card3_desc: "تتبع GPS في الوقت الفعلي. تطبيق يعمل بدون إنترنت للسائقين. فوترة وتسيير المخزون من الهاتف.",
+                feat_card3_link: "لمعرفة المزيد",
+                modal_close: "إغلاق",
+                inst_title: "دليل التثبيت والتحديث",
+                inst_desc: "تعرف على كيفية تثبيت وتحديث برنامج MagPro بخطوات بسيطة.",
+                inst_new_title: "تثبيت جديد",
+                inst_new_desc: "عند تثبيت البرنامج لأول مرة، يوفر لك المثبت الخيارات التالية:",
+                inst_mode_title: "1. وضع البرنامج:",
+                inst_mode_stock: "إدارة المخزون (Gestion de Stock): مخصص للمحلات ونقاط البيع.",
+                inst_mode_resto: "المطاعم (Restaurant): مخصص لإدارة المطاعم والمقاهي.",
+                inst_type_title: "2. نوع التثبيت:",
+                inst_type_server: "الخادم (Serveur): يثبت قاعدة البيانات والملفات الأساسية على الجهاز الرئيسي.",
+                inst_type_client: "العميل (Client): يربط الجهاز الفرعي بالخادم عبر إدخال عنوان IP الخاص التابع له.",
+                inst_up_title: "تحديث البرنامج",
+                inst_up_desc: "عند اختيار 'تحديث' (Mise à jour)، سيقوم المثبت بـ:",
+                inst_up_1: "الاحتفاظ بملف الإعدادات وقاعدة البيانات الخاصة بك بأمان.",
+                inst_up_2: "حذف الملفات القديمة واستبدالها بالنسخة الجديدة تلقائياً.",
+                inst_up_3: "لا يتطلب إعادة ضبط الشبكة أو إعدادات السيرفر.",
+                apps_eco: "نظام Android",
+                apps_title: "تحميل تطبيقات الهاتف (APK)",
+                apps_desc: "وسّع قوة MagPro على هواتفك الذكية.",
+                app1_title: "MagPro Vendeur",
+                app1_desc: "التطبيق المتصل بالكمبيوتر. للموزعين (Van Selling). يتضمن GPS، فوترة بدون إنترنت وطلبات المخزون.",
+                app2_title: "MagPro Scale",
+                app2_desc: "حوّل هاتفك إلى ميزان متصل بالمخزون. يحسب السعر بالغرام ويطبع ملصقات الباركود.",
+                app3_title: "MagPro Resto",
+                app3_desc: "أخذ الطلبات للنادل. إرسال مباشر للمطبخ، تسيير الطاولات وتقسيم الفاتورة.",
+                app4_title: "MagPro Standalone",
+                app4_desc: "حل مستقل 100%. يسير المخزون، المشتريات والمبيعات محلياً على الهاتف.",
+                btn_download_apk: "تحميل APK",
+                up_win: "آخر إصدار Windows",
+                up_title_prefix: "تحميل ",
+                up_setup: " MagPro Setup ",
+                up_fix1: "تجربة استخدام أكثر سلاسة وراحة.",
+                up_fix2: "أداء أقوى وأسرع في كل العمليات.",
+                up_fix3: "تطوير مستمر بناءً على احتياجاتك الحقيقية.",
+                up_dl_for: "تحميل لـ",
+                up_win_ver: "Windows 10/11 (64-bit)",
+                up_secure: "ملف آمن ومفحوص خالي من الفيروسات.",
+                up_trial: "فترة تجريبية مجانية لمدة 7 أيام",
+                up_trial_sub: "جرّب بدون أي التزام",
+                up_req_title: "متطلبات التشغيل",
+                up_req_os: "Windows 10/11 (64-bit)",
+                foot_desc: "النظام البرمجي الجزائري المصمم لتسهيل يومياتك، من الكاسة إلى هاتفك الذكي.",
+                foot_contact: "اتصل بنا",
+                foot_loc: "سكيكدة، الجزائر",
+                foot_copy1: "تم التطوير بواسطة",
+                foot_copy2: "جميع الحقوق محفوظة.",
+                yt_badge: "قناة يوتيوب الرسمية",
+                yt_title: "MagPro — دروس وشروحات",
+                yt_btn: "زيارة القناة",
+                yt_desc_short: "جميع شروحات البرنامج متوفرة على قناتنا الرسمية."
+            },
+            fr: {
+                nav_features: "Fonctionnalités",
+                nav_pc: "Windows PC",
+                nav_apps: "Applications Android",
+                nav_install: "Guide d'installation",
+                nav_contact: "Contact",
+                hero_title1: "La Solution Ultime pour Gérer",
+                hero_title2: "Votre Commerce",
+                hero_desc: "Que vous gériez un commerce, un restaurant ou un réseau de distribution — MagPro est la solution idéale pour votre facturation et gestion de stock.",
+                hero_badge1: "Stock Intelligent",
+                hero_badge2: "Factures Pro",
+                hero_badge3: "🔥 Essai gratuit 7 jours",
+                hero_badge4: "Fonctionne Hors-Ligne",
+                hero_cta_download: "Téléchargement Gratuit",
+                hero_cta_features: "Découvrir les Fonctions",
+                hero_stat1: "Essai gratuit",
+                hero_stat1_unit: "Jours",
+                hero_stat2: "Commerce · Restaurant · Distribution",
+                hero_stat2_unit: "Systèmes",
+                hero_stat3: "Support technique continu",
+                hero_stat3_unit: "Support",
+                feat_title_prefix: "Découvrez la puissance de ",
+                feat_desc: "Cliquez sur un module pour explorer toutes ses capacités extraites de notre technologie.",
+                feat_card1_title: "Commerces & Gros",
+                feat_card1_desc: "Gestion multi-tarifs (Détail, Demi-gros, Gros). Prise en charge des codes-barres, balances et gestion de stock avancée.",
+                feat_card1_link: "En savoir plus",
+                feat_card2_title: "Restaurants & Cafés",
+                feat_card2_desc: "Plan de tables interactif. Impression directe en cuisine. Menu digital QR Code. Gestion des suppléments.",
+                feat_card2_link: "En savoir plus",
+                feat_card3_title: "Distribution",
+                feat_card3_desc: "Suivi GPS en temps réel. Application hors-ligne pour chauffeurs. Facturation sur place et gestion du stock mobile.",
+                feat_card3_link: "En savoir plus",
+                modal_close: "Fermer",
+                inst_title: "Guide d'Installation et de Mise à Jour",
+                inst_desc: "Découvrez comment installer et mettre à jour le logiciel MagPro en toute simplicité.",
+                inst_new_title: "Nouvelle Installation",
+                inst_new_desc: "Lors de la première installation, le setup vous offre les choix suivants :",
+                inst_mode_title: "1. Mode du Programme :",
+                inst_mode_stock: "Gestion de Stock : Dédié aux commerces et points de vente.",
+                inst_mode_resto: "Restaurant : Optimisé pour la gestion des restaurants et cafés.",
+                inst_type_title: "2. Type d'installation :",
+                inst_type_server: "Serveur : Installe la base de données et les fichiers centraux sur le poste principal.",
+                inst_type_client: "Client : Connecte le poste secondaire au serveur via son adresse IP.",
+                inst_up_title: "Mise à Jour (Update)",
+                inst_up_desc: "En choisissant 'Mise à jour', le programme d'installation va :",
+                inst_up_1: "Sauvegarder en toute sécurité votre fichier de configuration et votre base de données.",
+                inst_up_2: "Nettoyer les anciens fichiers et déployer la nouvelle version automatiquement.",
+                inst_up_3: "Aucune reconfiguration réseau ou serveur n'est requise.",
+                apps_eco: "Écosystème Android",
+                apps_title: "Télécharger nos Applications Mobile (APK)",
+                apps_desc: "Étendez la puissance de MagPro sur vos Smartphones Android.",
+                app1_title: "MagPro Vendeur",
+                app1_desc: "L'application connectée au PC. Pour les vendeurs sur terrain (Van Selling). Inclut GPS, facturation hors-ligne et requêtes de stock.",
+                app2_title: "MagPro Scale",
+                app2_desc: "Transformez un Smartphone Android en balance connectée au stock. Calcule les prix au gramme et imprime des étiquettes codes-barres.",
+                app3_title: "MagPro Resto",
+                app3_desc: "Prise de commande mobile pour les serveurs. Envoie direct en cuisine, gestion des tables et division des additions.",
+                app4_title: "MagPro Standalone",
+                app4_desc: "Une solution 100% indépendante. Gère le stock, les achats et les ventes localement sur le Smartphone.",
+                btn_download_apk: "Télécharger APK",
+                up_win: "Dernière Version Windows",
+                up_title_prefix: "Télécharger ",
+                up_setup: "MagPro Setup ",
+                up_fix1: "Une expérience utilisateur plus fluide et agréable.",
+                up_fix2: "Performances optimisées pour un travail plus rapide.",
+                up_fix3: "Évolution continue basée sur vos besoins réels.",
+                up_dl_for: "Télécharger pour",
+                up_win_ver: "Windows 10/11 (64-bit)",
+                up_secure: "Fichier sécurisé et scanné sans virus.",
+                up_trial: "Période d'essai gratuite de 7 jours",
+                up_trial_sub: "Essayez sans engagement",
+                up_req_title: "Configuration Requise",
+                up_req_os: "Windows 10/11 (64-bit)",
+                foot_desc: "L'écosystème logiciel Algérien conçu pour simplifier votre quotidien, de la caisse jusqu'à votre Smartphone.",
+                foot_contact: "Contactez-nous",
+                foot_loc: "Skikda, Algérie",
+                foot_copy1: "Développé par",
+                foot_copy2: "Tous droits réservés.",
+                yt_badge: "Chaîne YouTube Officielle",
+                yt_title: "MagPro — Tutoriels & Guides",
+                yt_btn: "Visiter la Chaîne",
+                yt_desc_short: "Toutes les démonstrations et guides du logiciel disponibles sur notre chaîne."
+            }
+        };
+
+        const featureDetails = {
+            superette: {
+                icon: "fa-cart-shopping",
+                color: "text-blue-600",
+                bg: "bg-blue-100",
+                ar: {
+                    title: "المحلات التجارية والجملة",
+                    description: "نظام متكامل لتسيير المخزون المعقد، التسعير الديناميكي والمتابعة المالية المفصلة.",
+                    points: [
+                        "تسيير أسعار متعددة (تجزئة، نصف جملة، جملة) مع تعيين تلقائي حسب نوع الزبون.",
+                        "تسيير مستودعات متعددة: نقل السلع بين المتجر الرئيسي والمستودع بسهولة.",
+                        "دعم كامل للباركود والموازين الإلكترونية وطباعة ملصقات مخصصة (40x20، 45x35، 60x40).",
+                        "متابعة دقيقة لتواريخ الصلاحية مع تنبيهات قابلة للضبط مسبقاً.",
+                        "نظام ولاء ذكي: نقاط تراكمية قابلة للتحويل إلى خصومات فورية للزبائن.",
+                        "تسيير الأرقام التسلسلية للأجهزة الكهرومنزلية مع متابعة الضمان لكل وحدة.",
+                        "نظام عروض ترويجية قابل للبرمجة: سعر ثابت أو نسبة مع إمكانية تحديد حد الكمية وتاريخ الانتهاء.",
+                        "تقارير مالية مفصلة: الأرباح، قيمة المخزون، المصاريف، رقم الأعمال.",
+                        "تسعير خاص لزبائن أو موردين محددين خارج نطاق الأسعار العامة.",
+                        "إدارة وحدات متعددة لكل منتج (قطعة، كرتون، كيلوغرام...).",
+                        "صور للمنتجات تظهر في الفاتورة وعلى شاشة العرض الخارجية.",
+                        "كشف حساب مفصل لكل زبون أو مورد مع تتبع الديون والمدفوعات.",
+                        "دعم الدفع الجزئي (تسجيل الدين) والدفع الزائد (رصيد).",
+                        "إدارة المرتجعات: أوامر الإرجاع للزبائن والموردين.",
+                        "شاشة عرض السعر الخارجية (شاشة ثانية) تعرض المنتج وسعره للزبون.",
+                        "وضع الميزان الذكي: تحويل الهاتف أو الكمبيوتر إلى ميزان متصل بالمخزون.",
+                        "طباعة جماعية لملصقات الباركود مع استيراد الكميات من فواتير الشراء.",
+                        "كتالوج رقمي عبر QR Code يعرض منتجات المتجر للزبائن مباشرة.",
+                        "تحليل المنتجات الأكثر مبيعاً والأكثر ربحاً وحالة المخزون.",
+                        "تصدير كامل للتقارير إلى Excel و PDF.",
+                        "إدارة الموظفين: رواتب، حضور وانصراف، عطل، وبطاقات تسجيل.",
+                        "سجل نشاط كامل (Audit Log) لكل العمليات بتوقيت دقيق.",
+                        "نسخ احتياطي تلقائي للبيانات مع إمكانية الاسترداد الفوري.",
+                        "دعم طابع الضريبة (حق الطابع) في الفواتير الرسمية.",
+                        "إمكانية العمل في شبكة: سيرفر مركزي مع عدة أجهزة عميل."
+                    ]
+                },
+                fr: {
+                    title: "Commerces & Gros",
+                    description: "Un système complet pour la gestion des stocks complexes, la tarification dynamique et le suivi financier détaillé.",
+                    points: [
+                        "Gestion multi-tarifs (Détail, Demi-gros, Gros) avec assignation automatique par type de client.",
+                        "Gestion multi-dépôts : transfert de marchandises entre le magasin principal et le dépôt.",
+                        "Prise en charge intégrale des codes-barres, balances électroniques et impression d'étiquettes personnalisables (40x20, 45x35, 60x40).",
+                        "Suivi rigoureux des dates d'expiration avec alertes paramétrables en avance.",
+                        "Système de fidélité intelligent : points cumulables convertibles en remises immédiates.",
+                        "Gestion des numéros de série pour l'électroménager avec suivi individuel des garanties.",
+                        "Promotions programmables : prix fixe ou pourcentage, avec limite de quantité et date d'expiration.",
+                        "Rapports financiers détaillés : bénéfices, valeur du stock, dépenses, chiffre d'affaires.",
+                        "Tarification spéciale par client ou fournisseur, hors grille tarifaire générale.",
+                        "Gestion multi-unités par produit (pièce, carton, kilogramme...).",
+                        "Photos des produits affichées sur la facture et sur l'écran client externe.",
+                        "Relevé de compte détaillé par client ou fournisseur avec suivi des dettes et paiements.",
+                        "Support du paiement partiel (enregistrement de crédit) et du surplus (solde positif).",
+                        "Gestion des retours : avoirs clients et fournisseurs.",
+                        "Écran d'affichage prix externe (2ème écran) montrant le produit et son prix au client.",
+                        "Mode balance intelligent : transformation du PC ou smartphone en balance connectée au stock.",
+                        "Impression en masse d'étiquettes codes-barres avec import des quantités depuis les achats.",
+                        "Catalogue digital via QR Code présentant les produits du magasin aux clients.",
+                        "Analyse des produits les plus vendus, les plus rentables et état du stock.",
+                        "Export complet des rapports vers Excel et PDF.",
+                        "Gestion du personnel : salaires, pointage présence/absence, congés et badges.",
+                        "Journal d'activité complet (Audit Log) pour toutes les opérations avec horodatage précis.",
+                        "Sauvegarde automatique des données avec restauration immédiate possible.",
+                        "Support du droit de timbre dans les factures officielles.",
+                        "Fonctionnement en réseau : serveur central avec plusieurs postes clients."
+                    ]
+                }
+            },
+            resto: {
+                icon: "fa-utensils",
+                color: "text-orange-600",
+                bg: "bg-orange-100",
+                ar: {
+                    title: "المطاعم والمقاهي",
+                    description: "مصمم خصيصاً لتسريع الخدمة، مزامنة الصالة والمطبخ، وتقديم تجربة عصرية.",
+                    points: [
+                        "مخطط طاولات تفاعلي (متاحة، مشغولة، محجوزة) مع تسيير الكراسي وعدد الأغطية.",
+                        "حجز الطاولات مسبقاً مع التاريخ والوقت وإشعار عند الحلول.",
+                        "توجيه ذكي في المطبخ: طباعة تلقائية حسب الفئة (مثال: المشروبات في المقهى، الأطباق في المطبخ).",
+                        "نظام تذكير لإعلام المطبخ بأن طاولة تنتظر منذ فترة طويلة مع عرض التأخير بالدقائق.",
+                        "منيو رقمي عبر QR Code ديناميكي يولد تلقائياً، يعرض الأصناف بالصور والأسعار.",
+                        "تسيير متقدم للإضافات والخيارات (مثال: +جبن، بدون بصل) مع تعديل تلقائي للأسعار.",
+                        "وضع البيع السريع (Quick Sale) للطلبات الخارجية والتيك أواي.",
+                        "تعديل الطلب بعد إرساله للمطبخ مع إشعار تلقائي بالتغيير.",
+                        "نقل سهل للطلبات من طاولة إلى أخرى أو من كرسي إلى آخر.",
+                        "تقسيم الفاتورة بين عدة زبائن على نفس الطاولة.",
+                        "نداء للنادل مباشرة من المنيو الرقمي الخاص بالزبون.",
+                        "تطبيق Android مخصص للمقاهي والمطاعم يعمل بدون إنترنت (Offline) مع مزامنة تلقائية فور استعادة الاتصال.",
+                        "وضع اللوحي (Tablet Mode) لأجهزة الأندرويد مع واجهة مُحسَّنة للمس.",
+                        "تتبع نشاط كل نادل: عدد الطلبات، المبيعات، والأداء اليومي.",
+                        "تقارير مبيعات المطعم: أوقات الذروة، الأصناف الأكثر طلباً، وأداء الطاولات.",
+                        "طباعة وصل المطبخ بخط كبير وواضح مع اسم الطاولة ورقم الطلب.",
+                        "دعم عدة طابعات مطبخ موزعة حسب الفئات (مطبخ ساخن، مطبخ بارد...)."
+                    ]
+                },
+                fr: {
+                    title: "Restaurants & Cafés",
+                    description: "Spécialement conçu pour accélérer le service, synchroniser la salle et la cuisine, et offrir une expérience moderne.",
+                    points: [
+                        "Plan de tables interactif (Disponible, Occupée, Réservée) avec gestion des chaises et nombre de couverts.",
+                        "Réservation de tables à l'avance avec date, heure et notification à l'échéance.",
+                        "Routage intelligent en cuisine : impression automatique selon la catégorie (ex: Boissons au café, Plats en cuisine).",
+                        "Système de relance (Rappel) pour signaler à la cuisine qu'une table attend depuis trop longtemps, avec affichage du retard en minutes.",
+                        "Menu Digital via QR Code dynamique généré automatiquement, affichant les articles avec photos et prix.",
+                        "Gestion avancée des suppléments/options (Ex: +Fromage, Sans Oignon) avec ajustement automatique des prix.",
+                        "Mode Vente Rapide (Quick Sale) pour les commandes à emporter et take-away.",
+                        "Modification de commande après envoi en cuisine avec notification automatique du changement.",
+                        "Transfert facile des commandes d'une table à une autre ou d'une chaise à une autre.",
+                        "Division d'addition entre plusieurs clients à la même table.",
+                        "Appel serveur directement depuis le menu digital du client.",
+                        "Application Android native dédiée aux cafés et restaurants, fonctionnant intégralement Hors-Ligne (Offline) avec synchronisation automatique dès le retour de la connexion.",
+                        "Mode Tablette (Tablet Mode) pour appareils Android avec interface optimisée tactile.",
+                        "Suivi d'activité de chaque serveur : nombre de commandes, ventes et performance journalière.",
+                        "Rapports de ventes du restaurant : heures de pointe, articles les plus commandés, performance des tables.",
+                        "Impression ticket cuisine en grand format et lisible avec nom de table et numéro de commande.",
+                        "Support de plusieurs imprimantes cuisine réparties par catégories (cuisine chaude, cuisine froide...)."
+                    ]
+                }
+            },
+            van: {
+                icon: "fa-truck-fast",
+                color: "text-purple-600",
+                bg: "bg-purple-100",
+                ar: {
+                    title: "التوزيع",
+                    description: "التحكم الكامل في أسطول التوزيع الخاص بك. تتبع سائقيك وسير المخزون المتنقل في الوقت الفعلي.",
+                    points: [
+                        "تطبيق Android مخصص يعمل بدون إنترنت (Offline) مع مزامنة تلقائية فور استعادة الاتصال.",
+                        "لوحة تحكم Fleet Command لتتبع GPS في الوقت الفعلي: السرعة، المسارات، والحالة.",
+                        "إعادة عرض مسار السائق (Replay) مع التحكم في السرعة لمراجعة كل رحلة.",
+                        "تسيير مخزون الشاحنة: تحميل وإرجاع السلع من التطبيق المركزي بسهولة.",
+                        "إمكانية إرسال 'طلبات مخزون' من السائق مباشرة إلى المتجر عند نفاد الأصناف.",
+                        "تسجيل دفعات الزبائن والمصاريف الميدانية للسائق على الطريق.",
+                        "طباعة فورية عبر البلوتوث (Bluetooth) لوصل التسليم والفواتير مباشرة من هاتف السائق.",
+                        "تحديد الموقع الجغرافي التلقائي لنقاط بيع الزبائن على الخريطة.",
+                        "إحصاءات تفصيلية لكل سائق: إجمالي التحصيلات، قائمة التوصيلات المُنجزة والمعلقة.",
+                        "خريطة تفاعلية تعرض مواقع جميع الزبائن مع حالة التوصيل (تم / بانتظار).",
+                        "نظام تأكيد التوصيل بالقرب الجغرافي: لا يمكن تسجيل التوصيل إلا عند الاقتراب من الزبون.",
+                        "تبديل بين خريطة الشوارع والصور الجوية (Satellite) مباشرة من الخريطة.",
+                        "دعم أدوار متعددة: مدير يرى كل الأسطول، سائق يرى فقط طلباته.",
+                        "تقارير يومية وأسبوعية لأداء الأسطول قابلة للتصدير إلى PDF."
+                    ]
+                },
+                fr: {
+                    title: "Distribution",
+                    description: "Le contrôle total de votre flotte de distribution. Suivez vos chauffeurs et gérez le stock roulant en temps réel.",
+                    points: [
+                        "Application Mobile Android dédiée fonctionnant en mode Hors-Ligne (Offline) avec synchronisation automatique dès le retour de la connexion.",
+                        "Tableau de bord Fleet Command : suivi GPS en direct avec vitesse, trajets et statut en ligne.",
+                        "Replay du trajet du chauffeur avec contrôle de vitesse pour révision de chaque tournée.",
+                        "Gestion du stock camion : chargement et retour de marchandises depuis l'application centrale.",
+                        "Le chauffeur peut envoyer des 'Demandes de Stock' directement vers le magasin en cas de rupture.",
+                        "Enregistrement des versements clients et dépenses terrain du chauffeur sur la route.",
+                        "Impression Bluetooth instantanée des bons de livraison et factures depuis le smartphone du chauffeur.",
+                        "Géolocalisation automatique des points de vente clients sur la carte interactive.",
+                        "Statistiques détaillées par chauffeur : total encaissements, liste des livraisons effectuées et en attente.",
+                        "Carte interactive affichant tous les clients avec statut de livraison (effectuée / en attente).",
+                        "Confirmation de livraison par proximité géographique : impossible d'enregistrer une livraison sans être proche du client.",
+                        "Basculement entre carte routière et vue satellite directement depuis la carte.",
+                        "Support de rôles multiples : manager voit toute la flotte, chauffeur voit uniquement ses commandes.",
+                        "Rapports journaliers et hebdomadaires des performances de la flotte, exportables en PDF."
+                    ]
+                }
+            }
+        };
+
+        let currentLang = 'ar';
+        let currentModalKey = '';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'fr' ? 'ar' : 'fr';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerHTML = translations[currentLang][key];
+                }
+            });
+
+            document.getElementById('langToggleBtn').innerText = currentLang === 'ar' ? 'Français' : 'العربية';
+
+            if (document.getElementById('mobileMenu').classList.contains('open')) {
+                toggleMobileMenu();
+            }
+
+            const winDateEl = document.getElementById('win-date');
+            if (winDateEl) {
+                const dateStr = currentLang === 'ar' ? APP_CONFIG.WINDOWS.DATE_AR : APP_CONFIG.WINDOWS.DATE;
+                winDateEl.innerHTML = (currentLang === 'ar' ? 'تم التحديث في: ' : 'Mise à jour le : ') + dateStr + window.winFireHtml;
+            }
+
+            document.getElementById('date_flotte').innerHTML = (currentLang === 'ar' ? APP_CONFIG.ANDROID.FLOTTE.DATE_AR : APP_CONFIG.ANDROID.FLOTTE.DATE) + getFireIconHTML(APP_CONFIG.ANDROID.FLOTTE.DATE);
+            document.getElementById('date_scale').innerHTML = (currentLang === 'ar' ? APP_CONFIG.ANDROID.SCALE.DATE_AR : APP_CONFIG.ANDROID.SCALE.DATE) + getFireIconHTML(APP_CONFIG.ANDROID.SCALE.DATE);
+            document.getElementById('date_resto').innerHTML = (currentLang === 'ar' ? APP_CONFIG.ANDROID.RESTO.DATE_AR : APP_CONFIG.ANDROID.RESTO.DATE) + getFireIconHTML(APP_CONFIG.ANDROID.RESTO.DATE);
+            document.getElementById('date_standalone').innerHTML = (currentLang === 'ar' ? APP_CONFIG.ANDROID.STANDALONE.DATE_AR : APP_CONFIG.ANDROID.STANDALONE.DATE) + getFireIconHTML(APP_CONFIG.ANDROID.STANDALONE.DATE);
+
+            document.getElementById('devName').innerText = currentLang === 'ar' ? 'ر.سيف الدين' : 'R.SEIFEDDINE';
+
+            if (currentModalKey && !document.getElementById('featureModal').classList.contains('hidden')) {
+                openFeatureModal(currentModalKey);
+            }
+        }
+
+        function openFeatureModal(key) {
+            currentModalKey = key;
+            const data = featureDetails[key];
+            const langData = data[currentLang];
+
+            document.getElementById('modalIcon').className = `fa-solid ${data.icon} ${data.color} text-4xl`;
+            document.getElementById('modalIconBg').className = `w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${data.bg}`;
+            document.getElementById('modalTitle').innerText = langData.title;
+            document.getElementById('modalDesc').innerText = langData.description;
+
+            const ul = document.getElementById('modalPoints');
+            ul.innerHTML = '';
+            langData.points.forEach(point => {
+                const li = document.createElement('li');
+                li.className = "flex items-start gap-3 text-gray-600 text-sm md:text-base";
+                li.innerHTML = `<i class="fa-solid fa-check text-green-500 mt-1 flex-shrink-0"></i> <span>${point}</span>`;
+                ul.appendChild(li);
+            });
+
+            document.getElementById('featureModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            const scrollable = document.querySelector('#featureModal .overflow-y-auto');
+            if (scrollable) scrollable.scrollTop = 0;
+        }
+
+        function closeFeatureModal() {
+            document.getElementById('featureModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('open');
+        }
+
+        window.onscroll = function () {
+            const scrollY = document.body.scrollTop || document.documentElement.scrollTop;
+            document.getElementById('backToTop').classList.toggle('show', scrollY > 300);
+            document.getElementById('mainNav').classList.toggle('scrolled', scrollY > 10);
+        };
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function getFireIconHTML(dateStr) {
+            const months = { 'janvier': 0, 'février': 1, 'mars': 2, 'avril': 3, 'mai': 4, 'juin': 5, 'juillet': 6, 'août': 7, 'septembre': 8, 'octobre': 9, 'novembre': 10, 'décembre': 11 };
+            try {
+                const parts = dateStr.toLowerCase().split(' ');
+                if (parts.length >= 3) {
+                    const day = parseInt(parts[0], 10);
+                    const month = months[parts[1]];
+                    const year = parseInt(parts[2], 10);
+                    if (!isNaN(day) && month !== undefined && !isNaN(year)) {
+                        const diffDays = (new Date() - new Date(year, month, day)) / 86400000;
+                        if (diffDays <= 30) return ' <span class="text-orange-500 animate-pulse text-lg">🔥</span>';
+                    }
+                }
+            } catch (e) {}
+            return '';
+        }
+    </script>
+
+    <nav id="mainNav" class="bg-white/95 shadow-sm fixed w-full z-50 top-0 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 sm:h-[70px] items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 nav-logo-wrap">
+                    <img src="data:image/png;base64,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" alt="logo" style="width:28px;height:28px;object-fit:contain;display:inline-block;vertical-align:middle;" />
+                    <span class="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Mag<span class="text-blue-600">Pro</span></span>
+                </div>
+
+                <div class="hidden lg:flex items-center gap-1 xl:gap-2">
+                    <a href="#features" class="nav-link text-gray-600 hover:text-blue-600 font-semibold transition px-3 py-2 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 text-sm xl:text-[15px]">
+                        <i class="fa-solid fa-star text-yellow-500 text-base"></i>
+                        <span data-i18n="nav_features">Fonctionnalités</span>
+                    </a>
+                    <a href="#update" class="nav-link text-gray-600 hover:text-blue-600 font-semibold transition px-3 py-2 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 text-sm xl:text-[15px]">
+                        <i class="fa-brands fa-windows text-blue-500 text-base"></i>
+                        <span data-i18n="nav_pc">Windows PC</span>
+                    </a>
+                    <a href="#mobile-apps" class="nav-link text-gray-600 hover:text-blue-600 font-semibold transition px-3 py-2 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 text-sm xl:text-[15px]">
+                        <i class="fa-brands fa-android text-green-500 text-base"></i>
+                        <span data-i18n="nav_apps">Applications Android</span>
+                    </a>
+                    <a href="#install-guide" class="nav-link text-gray-600 hover:text-blue-600 font-semibold transition px-3 py-2 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 text-sm xl:text-[15px]">
+                        <i class="fa-solid fa-book-open text-purple-500 text-base"></i>
+                        <span data-i18n="nav_install">Guide d'installation</span>
+                    </a>
+                    <a href="#contact" class="nav-link text-gray-600 hover:text-blue-600 font-semibold transition px-3 py-2 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 text-sm xl:text-[15px]">
+                        <i class="fa-solid fa-headset text-orange-500 text-base"></i>
+                        <span data-i18n="nav_contact">Contact</span>
+                    </a>
+                    <div class="w-px h-6 bg-gray-200 mx-2"></div>
+                    <button onclick="toggleLanguage()" id="langToggleBtn" class="flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded-xl font-bold transition text-sm shadow-sm">
+                        <i class="fa-solid fa-globe text-sm opacity-80"></i>
+                        Français
+                    </button>
+                </div>
+
+                <div class="lg:hidden flex items-center gap-3">
+                    <button onclick="toggleLanguage()" class="flex items-center gap-1.5 bg-gray-900 hover:bg-gray-700 text-white px-3 py-2 rounded-lg font-bold transition text-xs min-h-[40px]">
+                        <i class="fa-solid fa-globe text-sm"></i>
+                    </button>
+                    <button onclick="toggleMobileMenu()" class="text-gray-700 hover:text-blue-600 focus:outline-none p-2 rounded-lg hover:bg-gray-100 transition min-h-[40px] min-w-[40px] flex items-center justify-center">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
             </div>
         </div>
+
+        <div id="mobileMenu" class="bg-white border-t border-gray-100 lg:hidden">
+            <div class="px-4 py-3 space-y-1 flex flex-col">
+                <a href="#features" onclick="toggleMobileMenu()" class="flex items-center gap-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-4 py-3 rounded-xl font-semibold text-base transition min-h-[48px]">
+                    <i class="fa-solid fa-star text-yellow-500 text-lg"></i>
+                    <span data-i18n="nav_features">Fonctionnalités</span>
+                </a>
+                <a href="#update" onclick="toggleMobileMenu()" class="flex items-center gap-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-4 py-3 rounded-xl font-semibold text-base transition min-h-[48px]">
+                    <i class="fa-brands fa-windows text-blue-500 text-lg"></i>
+                    <span data-i18n="nav_pc">Windows PC</span>
+                </a>
+                <a href="#mobile-apps" onclick="toggleMobileMenu()" class="flex items-center gap-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-4 py-3 rounded-xl font-semibold text-base transition min-h-[48px]">
+                    <i class="fa-brands fa-android text-green-500 text-lg"></i>
+                    <span data-i18n="nav_apps">Applications Android</span>
+                </a>
+                <a href="#install-guide" onclick="toggleMobileMenu()" class="flex items-center gap-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-4 py-3 rounded-xl font-semibold text-base transition min-h-[48px]">
+                    <i class="fa-solid fa-book-open text-purple-500 text-lg"></i>
+                    <span data-i18n="nav_install">Guide d'installation</span>
+                </a>
+                <a href="#contact" onclick="toggleMobileMenu()" class="flex items-center gap-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-4 py-3 rounded-xl font-semibold text-base transition min-h-[48px]">
+                    <i class="fa-solid fa-headset text-orange-500 text-lg"></i>
+                    <span data-i18n="nav_contact">Contact</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section bg-gradient-to-br from-gray-950 via-slate-900 to-blue-950 text-white text-center">
+
         
-        <a id="download-btn" href="#" target="_blank" class="w-full block text-center bg-green-50 hover:bg-green-600 hover:text-white text-green-700 font-bold py-3 px-4 rounded-xl transition shadow-sm pulse-btn">
-            <div class="flex items-center justify-center gap-2 mb-1">
-                <i class="fa-solid fa-download text-lg"></i> 
-                <span class="text-base">TÉLÉCHARGER LA MISE À JOUR</span>
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+
+        
+        <div class="hero-grid"></div>
+
+        <div class="max-w-5xl mx-auto px-4 relative z-10">
+
+            
+            <div class="flex flex-wrap justify-center gap-3 mb-8 sm:mb-10 animate-fade-in-up" style="animation-delay:0s;">
+                <span class="hero-badge" style="gap:10px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="7" width="20" height="14" rx="2" fill="#10b981" opacity="0.25"/>
+                        <path d="M2 9C2 7.9 2.9 7 4 7H20C21.1 7 22 7.9 22 9V10H2V9Z" fill="#10b981"/>
+                        <path d="M12 3L2 7H22L12 3Z" fill="#10b981" opacity="0.7"/>
+                        <rect x="9" y="13" width="6" height="4" rx="1" fill="#10b981"/>
+                        <line x1="2" y1="10" x2="22" y2="10" stroke="#10b981" stroke-width="1.5"/>
+                    </svg>
+                    <span data-i18n="hero_badge1">مخزون ذكي</span>
+                </span>
+                <span class="hero-badge" style="gap:10px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="2" width="13" height="17" rx="2" fill="#3b82f6" opacity="0.2" stroke="#3b82f6" stroke-width="1.5"/>
+                        <path d="M17 6H20L20 21H7V19" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="7" y1="8" x2="14" y2="8" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="7" y1="11" x2="14" y2="11" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="7" y1="14" x2="11" y2="14" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="14" cy="15" r="3" fill="#3b82f6" opacity="0.3" stroke="#3b82f6" stroke-width="1.2"/>
+                        <path d="M13 15L13.8 15.8L15.2 14.5" stroke="#3b82f6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span data-i18n="hero_badge2">فواتير احترافية</span>
+                </span>
+                <span class="hero-badge"><span data-i18n="hero_badge3">🔥 تجربة 7 أيام مجانية</span></span>
+                <span class="hero-badge" style="gap:10px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="2" width="14" height="10" rx="1.5" stroke="rgba(255,255,255,0.7)" stroke-width="1.4" fill="none"/>
+                        <line x1="6" y1="12" x2="6" y2="14.5" stroke="rgba(255,255,255,0.7)" stroke-width="1.3" stroke-linecap="round"/>
+                        <line x1="3.5" y1="14.5" x2="8.5" y2="14.5" stroke="rgba(255,255,255,0.7)" stroke-width="1.3" stroke-linecap="round"/>
+                        <rect x="16" y="7" width="7" height="13" rx="1.5" stroke="rgba(255,255,255,0.7)" stroke-width="1.4" fill="none"/>
+                        <line x1="18.5" y1="17.5" x2="21.5" y2="17.5" stroke="rgba(255,255,255,0.5)" stroke-width="1" stroke-linecap="round"/>
+                    </svg>
+                    <span data-i18n="hero_badge_platforms">Windows &amp; Android</span>
+                </span>
+                <span class="hero-badge" style="gap:10px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 19C3.8 19 2 17.2 2 15C2 13.1 3.3 11.5 5.1 11.1C5 10.7 5 10.4 5 10C5 7.2 7.2 5 10 5C12.1 5 13.9 6.3 14.7 8.1C15.1 8 15.5 8 16 8C18.2 8 20 9.8 20 12C20 14.2 18.2 16 16 16" stroke="#8b5cf6" stroke-width="1.6" stroke-linecap="round"/>
+                        <line x1="3" y1="3" x2="21" y2="21" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    <span data-i18n="hero_badge4">يعمل بدون إنترنت</span>
+                </span>
             </div>
-            <div class="text-xs font-medium opacity-80 flex items-center justify-center">
-                <i class="fa-regular fa-calendar me-1"></i> <span id="app-date"></span> <span id="fire-icon"></span>
+
+            
+            <h1 class="hero-title-spacing text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-6 sm:mb-8 leading-tight animate-fade-in-up" style="animation-delay:0.1s; letter-spacing:-1px;">
+                <span data-i18n="hero_title1" class="block text-white drop-shadow-2xl">الحل النهائي لإدارة</span>
+                <span class="gradient-text-animated" data-i18n="hero_title2">تجارتك</span>
+            </h1>
+
+            
+            <p data-i18n="hero_desc" class="text-lg sm:text-xl md:text-2xl mb-10 sm:mb-14 text-slate-300 max-w-3xl mx-auto px-2 animate-fade-in-up leading-relaxed" style="animation-delay:0.2s;">
+                سواء كنت تدير <span class="text-white font-semibold">محلاً تجارياً</span>، <span class="text-white font-semibold">مطعماً</span> أو <span class="text-white font-semibold">شبكة توزيع</span> — MagPro هو الحل الأمثل لفوترتك وتسيير مخزونك.
+            </p>
+
+
+
+
+            
+            <div class="flex flex-wrap justify-center gap-6 sm:gap-12 mt-14 sm:mt-20 animate-fade-in-up" style="animation-delay:0.4s;">
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl font-extrabold text-white">7 <span class="text-blue-400" data-i18n="hero_stat1_unit">أيام</span></div>
+                    <div class="text-slate-400 text-xs sm:text-sm font-semibold mt-1" data-i18n="hero_stat1">تجربة مجانية</div>
+                </div>
+                <div class="w-px bg-white/10 hidden sm:block"></div>
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl font-extrabold text-white">3 <span class="text-green-400" data-i18n="hero_stat2_unit">أنظمة</span></div>
+                    <div class="text-slate-400 text-xs sm:text-sm font-semibold mt-1" data-i18n="hero_stat2">محل · مطعم · توزيع</div>
+                </div>
+                <div class="w-px bg-white/10 hidden sm:block"></div>
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl font-extrabold text-white">24/7 <span class="text-yellow-400" data-i18n="hero_stat3_unit">دعم</span></div>
+                    <div class="text-slate-400 text-xs sm:text-sm font-semibold mt-1" data-i18n="hero_stat3">دعم فني متواصل</div>
+                </div>
             </div>
-        </a>
+
+        </div>
+
+        
+        <div class="hero-scroll">
+            <i class="fa-solid fa-chevron-down text-white text-sm"></i>
+        </div>
+
+    </section>
+
+    <section id="features" class="py-16 sm:py-24 bg-white border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12 sm:mb-20 animate-fade-in-up">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 text-center"><span data-i18n="feat_title_prefix">Découvrez la puissance de </span><span style="display:inline-flex;align-items:center;gap:8px;vertical-align:middle;white-space:nowrap;">MagPro<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAT7klEQVR4nO3daZAc5X3H8W9Pz8zeJwusQEJCS0koAkMKbFiLNSIbiDHBxjiEQ4Q4xq9sbFelUhhweJUCShhXxQWkihchphxwYiokxi6kMtliYcEbDieysSwuCcShC0l7H9qZ7s6L2ZGRtEfPbHc/O/v8Pq9s7exzSPTv+T9P98yAiIiIiIiIiIiIiIiIiIiIiIiIiFQux/QAotDT138ucLbpcYhV3uju6nzd9CAWqqIDoKevfyXwD8AmIGV4OGIXH3gcuLu7q3O36cGUqyIDoKevvwW4C7gNqDY8HLHbJPAQcG93V+eA6cGUqqICoKevvwr4FnAn0Gp4OCKfdBi4D3iwu6vziOnBhFURAdDT1+8AN1Mo91caHo7IXHYDdwP/2t3VGZgezHwWfQD09PVfDmwG/tj0WERK8H/Ad7u7Op81PZC5LNoA6OnrP5/ChX+F4aGILMQvKQTBNtMDmcmiCwCd7MsStGjvGCyaANDJvlhg0d0xMB4AOtkXCy2aOwbGAkAn+yLm7xgYCYDpk/37gfNN9C+yyGwDbjdxxyDRANDJvsicEr9jkEgA6GRfJLRE7xjEGgA62RcpWyJ3DGIJAJ3si0Qm1jsGkQaATvZFYhPLHYPIAkAn+yKJ2EaEdwwWHAA62RcxIpI7BmUHgE72RYxb8B2DkgPgyZ8/09LU0HiX67o62RdZHCY9z3toeGTk3r+4+sqS7hiEDoCH/+WxqmWntn+rqaFRJ/sii9PhoZHh+/Yd2P/gN756S6g7BumwLQ8MDX7xwKGD3y9/bCISs1bg+5l0ZjfwZJhfCL139zy/3EGJSII83wv92tAB4AcKAJFK4Pvhr1Wd3otYTAEgYjEFgIjFFAAiFlMAiFhMASBiMQWAiMVCPwnouu6edDq9FWZ5fjgIcPM5Uvk8jYf2XUQ+3xjVIEsVnLUO6huibdT3nVQuF67/3e/A+Fi0n/LadgrB8lWRNgngbHsl8jZZ1UHQfFK0bY6O4LyzI9o2S9HQRNCx1lz/OMMjY6Mv+74//VDeif95Ff8kn8/vCd1qRKM76qkbr+lofe/tNwE36rZDaWnF++59kDLTPYMDpDbfiePlo233S9fjbbg82jYB9/avR94mf3oV3hVfjrZN38PdfCcMHI623bAyGfw7NxPUG1vXvKGR4bXXfuHPdkbZaORbgLaP3rsbUxc/QPdV5i5+wOl9JvqLHwhWm1x9SuPsfDP6RlNu4d/WlFyO1PNbzPUPbmtzy91RNxppALy44ZwOP5e7Oco2S9LSinfhJca6Z2gA55W+yJt1amvx21dE3m5cgt27cPJTkbfrXXgJtBh8I+qvenFGh41173nezS/8z6sdUbYZdQVg9+r/3BacfByr/xpwjH+LW3i+j/PeO9G3qyrAJSDSKiCyAHhxwzkdeT+wfPV/IZ62K6j8L3J2xbANQFVALp+PtAqIsgLQ6h/D6g8YPn0uTyznAKAqIOIqIJIA0Oof3+pfafv/osI5QLjbpqVSFRBdFRBVBWD36t+7NbbVn0rb/xf5Ps57b8fTtqqAyKqABQdA/yWfsnv1Hx7EeTmmvT+VdfvveHGdA4CqgFw+f/NLr/7vgquAKCoAu1f/57bEVupCZe7/i+IMAFUBuA7OgquA0I8Cz+Tdz1+8POf5mxY6iLK1NOB++XqC1IKmMSdvfHT2Hx7aC7//NU59XTydV7ukPtNJnN/h6sc1doBD+0m1N0OmPpbmndOvx3v5WRgYiaX9eb3+Gs5Nt+A0nmyke8dh0+49e/9+5WnLPiy3jQVdOVnXvaM6nY7v6puH+5UbSLXGXAY2z/7op7f1CfyUA1XZWLp2zl1PurkplraLcjGNvSi9/wOccy6KrX3/Kzfg/fix2NqfT6pvC+6m20x1n/Z9/w4K375dlrK3AHuu2rA85Ti3lvv7C9bcgHPZ1ca6Dw5+hP98b6x9pNadG2v7SfB3/DbW9p3LrobmiN/4VQK/51mCoQPG+k+lUrd+PDC4vOzfL/cXHce5A4PfDORefS1OtsZU9/hP/wS8aN/wdzxn3adibT8JwY7XY23fydbgXn1trH3MaSqP/4ufmusfqqevxbKUFQB7//yS5YBW/zhVuThn/lG8fSQg2LkLpuY4R4mA7VUAcOvBwaGyqoByKwCt/nGv/mvPBjcTax+J8AKCt7bH2oWqAKopXJMlKzkAtPonsPqzNPb/RXGfA4CqAMqsAsqpALT6x7z6AzhLKACCN+I9BwBVAZRZBZQUAFr9k1n9C/v/9fH3k5DgnfjPAUBVAGVUAaVWAFr9k1j9l8r+v8gLCN6O9xwAVAVQRhUQOgC0+ie0+rO09v9FSZwDgKoASqwCSqkAtPonsPrD0tr/F8X9PECRqoDSqoBQAaDVP7nVn6rUktr/FyV1DgCqAiihCghbAWj1T2r1X7tuae3/ixI6BwBVAZRQBcwbAFr9E1z9WZr7/6KkzgFAVQAhq4AwFYBW/4RWf1ia+/+ipM4BQFUAIauAOQNAq3+yq/9S3f8XJXkOAKoCCFEFzFcBaPVPcvVfqvv/ogTPAUBVACGqgFkDQKt/wqs/S3v/X5TkOQCoCmCeKmCuCkCrf4KrPyzt/X9RkucAoCqAeaqAGQNAq3/yq/9S3/8XJX0OAKoCmKMKmK0C0Oqf9Oq/1Pf/RQmfA4CqAOaoAk4IAK3+BlZ/7Nj/F/kJbwNAVQCzVAEzVQBa/RNe/cGO/X9RkPBBIKgKYJYq4JgA0OpvZvW3Zf9fZOIcAFQFMEMVcHwFoNXfxOpvy/6/yMA5AKgKYIYq4GgAaPU3tPpj1/6/yMQ5AKgK4Lgq4JMVgFZ/A6s/2LX/LzJxDgCqAjiuCkiBVn+Tq79t+/8iU+cAoCqAT1QBxQpAq7+p1X+NZfv/IkPnAKAqgE9UAakPv/BZrf6mVn/s3P8XmToHAFUBwK37Dx1engq0+htb/cHO/X+RqXMAUBUAVAdBcEf6wNjEdQ4MRdmyk/FrHZdQdW3QsRbefzPK7kvi/PfPjQZAkE6bnX9uxFjf7PgtgcG507HW7Py3PkXQdXnIF6dzgVM9HmX3AVyXHpmaOiXKRgGYCv9SbyIDE17kQwjLHcgZ6xvAG00BBuc/nDfWN4A3ZG7ukDE8/3wJ8/cycKQp6hGU/fXgIlL5FAAiFlMAiFhMASBiMQWAiMUUACIWUwCIWEwBIGIxBYCIxRQAIhZTAIhYTAEgYjEFgIjFFAAiFjP7XlQngMDg20EDrzAGUzR/zd/k/MFLAcOmenczAa4/Yap7XH8CN2PuPwDNX/M3OX9gOAV8aKr3bJ1HNn/QVPdk8wfJ1plLYM1f8zc5f+DDFPA7U71Xt+SpObLbVPfUHNlNdYu5T4TR/DV/k/MHfpcCnjfVe0P7FI3j5j4ZtnH8dRraS/j8sohp/pq/yfkDz6eAp4HkY9AJaFo5SfPoy2YOQgKP5tGXaVo5aeYgSPPX/E3Ov3DNP53a2L99L7Al6d6blh8hW+uT9Q7TPPZa0t3TPPYaWe8w2VqfpuVHEu9f89f8Tc4f2NLd1bm3+BzAfUCiMdh+3h++FmrZoScT7j6Y7vPEsSRF89f8i5KfPwGFa77wINDG/u39QGLfUtBy5gT1p/7h47gbJnfQOtyXVPe0DvfRMLnj6P+vPzVHy5nJ3Y7R/DV/k/MHftrd1dkPxz4J+B1gX9w9p2s8Vlx84qMHZxx4hHR+IO7uSecHOOPAIyf8+YqLh0nXxL8X0/w1f5Pzp3CNf6f4f44GwMb+7fuBG4HYNkROKmD1ZYNkav0Tfpb1Bjlrz2acIL4v6nCCHGft2UzWGzzhZ5lan9WXDeKk4ivFNH/N3+T8KVzbN3Z3de4v/sEx7wXY2L+9F7gFiH4UTsCqSwdpWDb7bZfGiddZvfcHEMRwUyLIs3rvD2icmP22S8OyKVZdOhjPqbDmr/mbnH/hmr6lu6uz95hhzfTK3s71VwFPAI1R9JzK+Jy5cZDmM8IVFwN1n2bnstvx3doouifljdOx935axl4N9frB96t4t7cZPxfNe6UWw/zP2ns/zSHnP/RBFbuei3b+qy8bpGlFuPkP1n2adzT/yOZP4XH/G7u7Op85/gczBgBAb+f6NcCPgc8spOfatinO3DhIdVNp+6uJzOnsWvZ3jNWsWUj31E28xeq9D1CT+6ik35sccnm3t5nxg9kF9a/5a/4m5w+8AvxVd1fnWzP9cNYAAOjtXJ8CvgZ8D1hVSq/Z+jzt543StnYCZ85eZhfg8HHTFew56XqmMqeW9LvZ3H5OO/TvnDz0S5wyb7EEARx8s4Z9v6lnajRdWv+av+ZvcP7Ae8A9wKPdXZ0nHjpMCzW03s71aeBKCoeE3cBs3yh8wM36PadfNHx+21kT65yIPm0gwGWw7kIONX6O4drzyaebZ3xdOj9I4/g2Thp+geax13Aieqdz4BfKwsO7ahjZkyU/6c7cf7VHw2lTtK6eoGnFETT/SLrX/HE52PwnO95v+9o2z22c8/oDeoCfUHjQZ97DhLKyqbdz/XKgAyh+XfEQsHNj//YPAQ4/fNKWTFXw+XLans1I9dnsb72GAMil25jMtBM4GaBwulud20cmf7C8CZUgCCA37nJkOEUwWTgrdaozVDX6ZGq9stM+dP+YmX/9xA7aB342Pf8UR4bTeFOF3txsQFVjnkytj+PAvpYvMVqzLpZxVMK//6mH/4uGyTci7TeXadja+te7rwTo6euf8frr7uos+Z29pdU106Yv9Fk7c6uiP0WdyrRxuKFr1p+Pplsi73NWjUD7sX8U682bEBKZ/8DPcBzI1vlk62Y/zR6tWTfnv1UcFtO/f8vIizAZbZeuP3b0f09f6JG8jT+WjwSL816qiI2cmN4wpM8EFLGYAkDEYgoAEYspAEQspgAQsZgCQMRiCgARiykARCxW1pOAi90//WaC3x8092ze35xbxwWnzPy8+PFu6zH2xUwAPNQdyTu+j1XCc2Cm5x/WhW1TfPW8tpCvjvuB5OioAhCxmAJAxGIKABGLKQBELKYAELGYAkDEYgoAEYvFEwCVcxtUpDLEdE3FEwCqK0SiFdM1FcuTgEFdkI/oA1mPytQ7NNeGi8Hammrc6oV9nvtC1NfX09yUCfVat9rId8MfFfrv1HcIGsI94ldb7+CHbLextjIeRm2sS4X+u8rUQxDxt/0GbjxfFxTP3/7JwXjgRvsXUNtYz8ozwn3SbNu+IapzyX/ne1H7skZWnlEd6rXVzeaCCmBlx2yfMH0sZ2gngTvrx8sfo23FaZzUFO7fynv1QKjXmZY9pYqVHU3zvxBwM/UEw+H+rkLzGI+2wQJtAUQqQUzXlA4BRSpBRR0CikhFUACIWEwBIGIxBYCIxRQAIhZTAIhYTAEgYjEFgIjFFAAiFlMAiFhMASBiMQWAiMUUACIWUwCIWEwBIGIxBYCIxRQAIhZTAIhYrDI+khXArQ/90u9tCPfhjYvB1hvCfSincakG0yOQGKgCELGYAkDEYgoAEYspAEQspgAQsZgCQMRiCgARiykARCymABCxWOU8CVjC16PvOJjj43EvxsHMbV1bhpNr3VCvfeH9yZhHM7fPhfwac4Jc+Ead8P9Zda2oCt+uQWtaM6aHEIvKCQA//IXy1Jvj9H1wJMbBzO2uzzZy8hnhAuDeXw3HPJq5hQ+AEoLKqQn90kp5bHss55seQiy0BRCxmAJAxGIKABGLKQBELKYAELGYAkDEYgoAEYspAEQspgAQsVjlPAkolSOYCP3Se14ainEg0VnTmuG6dbWmhxE5BYBEr4T3bZh8ZFu0BRCxmgJAxGIKABGLKQBELKYAELGYAkDEYgoAEYspAEQspgAQsdiSfBJw4ON9jO0bMNb/8EgHEO7DNsf27Yp3MPM6xWjv5ucfzkB1C1AZH2BaClUAIhZTAIhYTAEgYjEFgIjFFAAiFlMAiFhMASBisVgCIAjiaFXEXnFdU/EEgAoLkUjFdU3F8iTgWL6loSFzKI6mQzm7vd5Y3wDNtdnQXyd90aqWmEcjS8F4vqUBon+6NfIA+M//uGvD4an+K0wGwNcvPt1Y36V64Jq1pocgFeDQ1Mornn7q2g1fvPaBl6JsN9K64pEn/rlm3+TZjwJulO2KCO5HE+c++qN/e7AmykYjDYB8UHOPT3pNlG2KSIFPZs2Y13pPlG1GFgAPP/7EBuDbUbUnIjNxvj19rUUikgB4+PEnagCV/iLxc4FHp6+5BYuqArgHUOkvkow1FK65BVtwAKj0FzEikq3AggJApb+IMZFsBRZaAaj0FzFnwVuBsgNApb/IorCgrUBZTwKaKP2d8V/jvv+NpLqT4+X2mB6BzKy4FTj/m5tumij1l8t9FDjx0t/J78UZ/kWSXYpUiuJW4G9L/cWStwAq/UUWpbK2AiUFgE79RRatsu4KlFoB6NRfZPEq+a5A6ABQ6S9SEUraCoQKAJX+IhWjpK1A2ApApb9I5Qi9FZg3AFT6i1SkUFuBOQNApb9IxQq1FZivAlDpL1K55t0KOLP9YLp8eB6t/iKVzAMu/eamm2b8MNEZA2C6bNiGVn+RpeAtYMb3Csy2BVDpL7J0zLoVOKECUOkvsiTNuBU4JgBU+ossaSdsBY7fAqj0F1m6TtgKHK0AVPqLWOGYrYADKv1FLHN0K5ACCIJApb+IPdZMX/M4//ijxzZkMhmV/iJ28fK53KXpfC73Qy+fHzU9GhFJVhAEP0yPDA1dYHogImLEBZF+PbiIVBYFgIjFFAAiFlMAiFhMASBiMQWAiMUUACIWUwCIWEwBIGKxNPCXpgchIiIiIiIiIiIiIiIiIiIiIiIiIiIipfp/pkDmBzP6KNsAAAAASUVORK5CYII=" alt="" style="width:54px;height:54px;object-fit:contain;" /></span></h2>
+                <p data-i18n="feat_desc" class="text-gray-500 text-sm sm:text-lg lg:text-xl max-w-2xl mx-auto">Cliquez sur un module pour explorer toutes ses capacités extraites de notre technologie.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
+                <div onclick="openFeatureModalWithHistory('superette')" class="p-6 sm:p-10 bg-white rounded-3xl shadow-xl transition-all duration-300 border border-gray-100 group cursor-pointer hover-lift flex flex-col items-center text-center">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 text-3xl sm:text-4xl mb-4 sm:mb-6 group-hover:bg-blue-600 group-hover:text-white transition shadow-sm">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <h3 data-i18n="feat_card1_title" class="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">Commerces & Gros</h3>
+                    <p data-i18n="feat_card1_desc" class="text-gray-600 text-sm sm:text-base leading-relaxed mb-4 sm:mb-6 flex-grow">Gestion multi-tarifs (Détail, Demi-gros, Gros). Prise en charge des codes-barres, balances et gestion de stock avancée.</p>
+                    <span class="text-blue-600 font-bold text-sm sm:text-base bg-blue-50 px-4 py-2 sm:px-6 sm:py-2 rounded-full group-hover:bg-blue-100 transition"><span data-i18n="feat_card1_link">En savoir plus</span> <i class="fa-solid fa-arrow-right ms-2 rtl:rotate-180"></i></span>
+                </div>
+                <div onclick="openFeatureModalWithHistory('resto')" class="p-6 sm:p-10 bg-white rounded-3xl shadow-xl transition-all duration-300 border border-gray-100 group cursor-pointer hover-lift flex flex-col items-center text-center">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 text-3xl sm:text-4xl mb-4 sm:mb-6 group-hover:bg-orange-600 group-hover:text-white transition shadow-sm">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <h3 data-i18n="feat_card2_title" class="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">Restaurants & Cafés</h3>
+                    <p data-i18n="feat_card2_desc" class="text-gray-600 text-sm sm:text-base leading-relaxed mb-4 sm:mb-6 flex-grow">Plan de tables interactif. Impression directe en cuisine. Menu digital QR Code. Gestion des suppléments.</p>
+                    <span class="text-orange-600 font-bold text-sm sm:text-base bg-orange-50 px-4 py-2 sm:px-6 sm:py-2 rounded-full group-hover:bg-orange-100 transition"><span data-i18n="feat_card2_link">En savoir plus</span> <i class="fa-solid fa-arrow-right ms-2 rtl:rotate-180"></i></span>
+                </div>
+                <div onclick="openFeatureModalWithHistory('van')" class="p-6 sm:p-10 bg-white rounded-3xl shadow-xl transition-all duration-300 border border-gray-100 group cursor-pointer hover-lift flex flex-col items-center text-center">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 text-3xl sm:text-4xl mb-4 sm:mb-6 group-hover:bg-purple-600 group-hover:text-white transition shadow-sm">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h3 data-i18n="feat_card3_title" class="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">Distribution</h3>
+                    <p data-i18n="feat_card3_desc" class="text-gray-600 text-sm sm:text-base leading-relaxed mb-4 sm:mb-6 flex-grow">Suivi GPS en temps réel. Application hors-ligne pour chauffeurs. Facturation sur place et gestion du stock mobile.</p>
+                    <span class="text-purple-600 font-bold text-sm sm:text-base bg-purple-50 px-4 py-2 sm:px-6 sm:py-2 rounded-full group-hover:bg-purple-100 transition"><span data-i18n="feat_card3_link">En savoir plus</span> <i class="fa-solid fa-arrow-right ms-2 rtl:rotate-180"></i></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="update" class="py-16 sm:py-24 bg-gray-900 text-white border-b border-gray-800">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            <span data-i18n="up_win" class="text-blue-400 font-bold tracking-widest uppercase mb-4 block text-xs sm:text-base animate-fade-in-up">Dernière Version Windows</span>
+            <h2 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-8 sm:mb-12 animate-fade-in-up text-center" style="animation-delay:0.1s;"><span data-i18n="up_title_prefix">Télécharger </span><span style="display:inline-flex;align-items:center;gap:8px;vertical-align:middle;white-space:nowrap;">MagPro<img src="data:image/png;base64,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" alt="" style="width:54px;height:54px;object-fit:contain;" /></span></h2>
+
+            <div class="bg-gray-800 p-6 sm:p-12 rounded-3xl shadow-2xl border border-gray-700 relative overflow-hidden animate-fade-in-up" style="animation-delay:0.2s;">
+                <div class="absolute -right-10 -top-10 text-gray-700 opacity-10 hidden md:block">
+                    <i class="fa-brands fa-windows text-[250px]"></i>
+                </div>
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-10 relative z-10">
+                    <div class="text-start w-full md:w-auto">
+                        <h3 class="text-2xl sm:text-4xl font-extrabold text-white mb-2 sm:mb-3" dir="ltr">
+                            <span data-i18n="up_setup">MagPro Setup </span><span class="text-blue-400">v<span class="win-version"></span></span>
+                        </h3>
+                        <p class="text-gray-400 text-xs sm:text-base font-medium mb-4 sm:mb-6" id="win-date"></p>
+                        <ul class="text-gray-300 space-y-2 sm:space-y-3 text-sm sm:text-lg mb-5 sm:mb-7">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check-circle text-green-400"></i> <span data-i18n="up_fix1">Correction des bugs mineurs.</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check-circle text-green-400"></i> <span data-i18n="up_fix2">Amélioration de la vitesse.</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check-circle text-green-400"></i> <span data-i18n="up_fix3">Nouvelle fonctionnalité.</span></li>
+                        </ul>
+                        <div class="border-t border-gray-700 pt-4 sm:pt-5">
+                            <p class="text-gray-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2"><span data-i18n="up_req_title">Configuration Requise</span></p>
+                            <span class="inline-flex items-center gap-2 text-gray-300 text-xs sm:text-sm font-medium">
+                                <i class="fa-brands fa-windows text-blue-400 text-base"></i>
+                                <span data-i18n="up_req_os">Windows 10/11 (64-bit)</span>
+                            </span>
+                        </div>
+                    </div>
+                    <a id="mainDownloadBtn" href="#" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-4 sm:px-10 sm:py-6 rounded-2xl font-bold text-base sm:text-xl shadow-[0_0_30px_rgba(37,99,235,0.4)] transition flex items-center gap-4 w-full md:w-auto justify-center pulse-btn hover:-translate-y-1 min-h-[60px]">
+                        <i class="fa-brands fa-windows text-2xl sm:text-4xl"></i>
+                        <div class="text-start">
+                            <div data-i18n="up_dl_for" class="text-[10px] sm:text-sm font-normal opacity-90 uppercase tracking-wide">Télécharger pour</div>
+                            <div data-i18n="up_win_ver" class="leading-none mt-1 text-sm sm:text-base" dir="ltr">Windows 10/11 (64-bit)</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="border-t border-gray-700 mt-6 sm:mt-8 pt-4 sm:pt-5 relative z-10 text-center">
+                    <p class="text-gray-400 text-xs sm:text-sm font-medium">
+                        <i class="fa-solid fa-shield-halved text-green-400 me-2"></i>
+                        <span data-i18n="up_secure">Fichier sécurisé et scanné sans virus.</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-6 sm:mt-8 animate-fade-in-up" style="animation-delay:0.3s;">
+                <div class="relative inline-block">
+                    <div class="absolute inset-0 bg-orange-500/30 blur-2xl rounded-3xl"></div>
+                    <div class="relative bg-gradient-to-r from-orange-600/30 via-red-500/30 to-orange-600/30 border-2 border-orange-400/80 text-white px-8 py-4 sm:px-14 sm:py-6 rounded-2xl shadow-[0_0_40px_rgba(249,115,22,0.4)]">
+                        <div class="flex items-center justify-center gap-3 sm:gap-5">
+                            <span class="text-3xl sm:text-4xl animate-pulse" style="filter:drop-shadow(0 0 8px rgba(249,115,22,0.9))">🔥</span>
+                            <div class="text-start">
+                                <p class="text-orange-300 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1" data-i18n="up_trial_sub">Essayez sans engagement</p>
+                                <p class="text-white text-lg sm:text-2xl font-extrabold leading-tight" data-i18n="up_trial">Période d'essai gratuite de 7 jours</p>
+                            </div>
+                            <span class="text-3xl sm:text-4xl animate-pulse" style="filter:drop-shadow(0 0 8px rgba(249,115,22,0.9));animation-delay:0.3s;">🔥</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="mobile-apps" class="py-16 sm:py-24 bg-gray-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12 sm:mb-20 animate-fade-in-up">
+                <span data-i18n="apps_eco" class="text-green-600 font-bold tracking-widest uppercase mb-4 block text-xs sm:text-base">Écosystème Android</span>
+                <h2 data-i18n="apps_title" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4">Télécharger nos Applications Mobile (APK)</h2>
+                <p data-i18n="apps_desc" class="text-gray-500 text-sm sm:text-lg lg:text-xl max-w-2xl mx-auto">Étendez la puissance de MagPro sur vos Smartphones Android.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-lg border-t-8 border-blue-500 transition hover-lift flex flex-col h-full relative group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-50 text-blue-600 flex items-center justify-center rounded-2xl text-xl sm:text-2xl shrink-0 group-hover:bg-blue-600 group-hover:text-white transition shadow-sm">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h3 data-i18n="app1_title" class="font-bold text-gray-900 leading-tight text-[13px] sm:text-sm whitespace-nowrap" dir="ltr" style="display:flex;align-items:center;gap:5px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAT7klEQVR4nO3daZAc5X3H8W9Pz8zeJwusQEJCS0koAkMKbFiLNSIbiDHBxjiEQ4Q4xq9sbFelUhhweJUCShhXxQWkihchphxwYiokxi6kMtliYcEbDieysSwuCcShC0l7H9qZ7s6L2ZGRtEfPbHc/O/v8Pq9s7exzSPTv+T9P98yAiIiIiIiIiIiIiIiIiIiIiIiIiFQux/QAotDT138ucLbpcYhV3uju6nzd9CAWqqIDoKevfyXwD8AmIGV4OGIXH3gcuLu7q3O36cGUqyIDoKevvwW4C7gNqDY8HLHbJPAQcG93V+eA6cGUqqICoKevvwr4FnAn0Gp4OCKfdBi4D3iwu6vziOnBhFURAdDT1+8AN1Mo91caHo7IXHYDdwP/2t3VGZgezHwWfQD09PVfDmwG/tj0WERK8H/Ad7u7Op81PZC5LNoA6OnrP5/ChX+F4aGILMQvKQTBNtMDmcmiCwCd7MsStGjvGCyaANDJvlhg0d0xMB4AOtkXCy2aOwbGAkAn+yLm7xgYCYDpk/37gfNN9C+yyGwDbjdxxyDRANDJvsicEr9jkEgA6GRfJLRE7xjEGgA62RcpWyJ3DGIJAJ3si0Qm1jsGkQaATvZFYhPLHYPIAkAn+yKJ2EaEdwwWHAA62RcxIpI7BmUHgE72RYxb8B2DkgPgyZ8/09LU0HiX67o62RdZHCY9z3toeGTk3r+4+sqS7hiEDoCH/+WxqmWntn+rqaFRJ/sii9PhoZHh+/Yd2P/gN756S6g7BumwLQ8MDX7xwKGD3y9/bCISs1bg+5l0ZjfwZJhfCL139zy/3EGJSII83wv92tAB4AcKAJFK4Pvhr1Wd3otYTAEgYjEFgIjFFAAiFlMAiFhMASBiMQWAiMVCPwnouu6edDq9FWZ5fjgIcPM5Uvk8jYf2XUQ+3xjVIEsVnLUO6huibdT3nVQuF67/3e/A+Fi0n/LadgrB8lWRNgngbHsl8jZZ1UHQfFK0bY6O4LyzI9o2S9HQRNCx1lz/OMMjY6Mv+74//VDeif95Ff8kn8/vCd1qRKM76qkbr+lofe/tNwE36rZDaWnF++59kDLTPYMDpDbfiePlo233S9fjbbg82jYB9/avR94mf3oV3hVfjrZN38PdfCcMHI623bAyGfw7NxPUG1vXvKGR4bXXfuHPdkbZaORbgLaP3rsbUxc/QPdV5i5+wOl9JvqLHwhWm1x9SuPsfDP6RlNu4d/WlFyO1PNbzPUPbmtzy91RNxppALy44ZwOP5e7Oco2S9LSinfhJca6Z2gA55W+yJt1amvx21dE3m5cgt27cPJTkbfrXXgJtBh8I+qvenFGh41173nezS/8z6sdUbYZdQVg9+r/3BacfByr/xpwjH+LW3i+j/PeO9G3qyrAJSDSKiCyAHhxwzkdeT+wfPV/IZ62K6j8L3J2xbANQFVALp+PtAqIsgLQ6h/D6g8YPn0uTyznAKAqIOIqIJIA0Oof3+pfafv/osI5QLjbpqVSFRBdFRBVBWD36t+7NbbVn0rb/xf5Ps57b8fTtqqAyKqABQdA/yWfsnv1Hx7EeTmmvT+VdfvveHGdA4CqgFw+f/NLr/7vgquAKCoAu1f/57bEVupCZe7/i+IMAFUBuA7OgquA0I8Cz+Tdz1+8POf5mxY6iLK1NOB++XqC1IKmMSdvfHT2Hx7aC7//NU59XTydV7ukPtNJnN/h6sc1doBD+0m1N0OmPpbmndOvx3v5WRgYiaX9eb3+Gs5Nt+A0nmyke8dh0+49e/9+5WnLPiy3jQVdOVnXvaM6nY7v6puH+5UbSLXGXAY2z/7op7f1CfyUA1XZWLp2zl1PurkplraLcjGNvSi9/wOccy6KrX3/Kzfg/fix2NqfT6pvC+6m20x1n/Z9/w4K375dlrK3AHuu2rA85Ti3lvv7C9bcgHPZ1ca6Dw5+hP98b6x9pNadG2v7SfB3/DbW9p3LrobmiN/4VQK/51mCoQPG+k+lUrd+PDC4vOzfL/cXHce5A4PfDORefS1OtsZU9/hP/wS8aN/wdzxn3adibT8JwY7XY23fydbgXn1trH3MaSqP/4ufmusfqqevxbKUFQB7//yS5YBW/zhVuThn/lG8fSQg2LkLpuY4R4mA7VUAcOvBwaGyqoByKwCt/nGv/mvPBjcTax+J8AKCt7bH2oWqAKopXJMlKzkAtPonsPqzNPb/RXGfA4CqAMqsAsqpALT6x7z6AzhLKACCN+I9BwBVAZRZBZQUAFr9k1n9C/v/9fH3k5DgnfjPAUBVAGVUAaVWAFr9k1j9l8r+v8gLCN6O9xwAVAVQRhUQOgC0+ie0+rO09v9FSZwDgKoASqwCSqkAtPonsPrD0tr/F8X9PECRqoDSqoBQAaDVP7nVn6rUktr/FyV1DgCqAiihCghbAWj1T2r1X7tuae3/ixI6BwBVAZRQBcwbAFr9E1z9WZr7/6KkzgFAVQAhq4AwFYBW/4RWf1ia+/+ipM4BQFUAIauAOQNAq3+yq/9S3f8XJXkOAKoCCFEFzFcBaPVPcvVfqvv/ogTPAUBVACGqgFkDQKt/wqs/S3v/X5TkOQCoCmCeKmCuCkCrf4KrPyzt/X9RkucAoCqAeaqAGQNAq3/yq/9S3/8XJX0OAKoCmKMKmK0C0Oqf9Oq/1Pf/RQmfA4CqAOaoAk4IAK3+BlZ/7Nj/F/kJbwNAVQCzVAEzVQBa/RNe/cGO/X9RkPBBIKgKYJYq4JgA0OpvZvW3Zf9fZOIcAFQFMEMVcHwFoNXfxOpvy/6/yMA5AKgKYIYq4GgAaPU3tPpj1/6/yMQ5AKgK4Lgq4JMVgFZ/A6s/2LX/LzJxDgCqAjiuCkiBVn+Tq79t+/8iU+cAoCqAT1QBxQpAq7+p1X+NZfv/IkPnAKAqgE9UAakPv/BZrf6mVn/s3P8XmToHAFUBwK37Dx1engq0+htb/cHO/X+RqXMAUBUAVAdBcEf6wNjEdQ4MRdmyk/FrHZdQdW3QsRbefzPK7kvi/PfPjQZAkE6bnX9uxFjf7PgtgcG507HW7Py3PkXQdXnIF6dzgVM9HmX3AVyXHpmaOiXKRgGYCv9SbyIDE17kQwjLHcgZ6xvAG00BBuc/nDfWN4A3ZG7ukDE8/3wJ8/cycKQp6hGU/fXgIlL5FAAiFlMAiFhMASBiMQWAiMUUACIWUwCIWEwBIGIxBYCIxRQAIhZTAIhYTAEgYjEFgIjFFAAiFjP7XlQngMDg20EDrzAGUzR/zd/k/MFLAcOmenczAa4/Yap7XH8CN2PuPwDNX/M3OX9gOAV8aKr3bJ1HNn/QVPdk8wfJ1plLYM1f8zc5f+DDFPA7U71Xt+SpObLbVPfUHNlNdYu5T4TR/DV/k/MHfpcCnjfVe0P7FI3j5j4ZtnH8dRraS/j8sohp/pq/yfkDz6eAp4HkY9AJaFo5SfPoy2YOQgKP5tGXaVo5aeYgSPPX/E3Ov3DNP53a2L99L7Al6d6blh8hW+uT9Q7TPPZa0t3TPPYaWe8w2VqfpuVHEu9f89f8Tc4f2NLd1bm3+BzAfUCiMdh+3h++FmrZoScT7j6Y7vPEsSRF89f8i5KfPwGFa77wINDG/u39QGLfUtBy5gT1p/7h47gbJnfQOtyXVPe0DvfRMLnj6P+vPzVHy5nJ3Y7R/DV/k/MHftrd1dkPxz4J+B1gX9w9p2s8Vlx84qMHZxx4hHR+IO7uSecHOOPAIyf8+YqLh0nXxL8X0/w1f5Pzp3CNf6f4f44GwMb+7fuBG4HYNkROKmD1ZYNkav0Tfpb1Bjlrz2acIL4v6nCCHGft2UzWGzzhZ5lan9WXDeKk4ivFNH/N3+T8KVzbN3Z3de4v/sEx7wXY2L+9F7gFiH4UTsCqSwdpWDb7bZfGiddZvfcHEMRwUyLIs3rvD2icmP22S8OyKVZdOhjPqbDmr/mbnH/hmr6lu6uz95hhzfTK3s71VwFPAI1R9JzK+Jy5cZDmM8IVFwN1n2bnstvx3doouifljdOx935axl4N9frB96t4t7cZPxfNe6UWw/zP2ns/zSHnP/RBFbuei3b+qy8bpGlFuPkP1n2adzT/yOZP4XH/G7u7Op85/gczBgBAb+f6NcCPgc8spOfatinO3DhIdVNp+6uJzOnsWvZ3jNWsWUj31E28xeq9D1CT+6ik35sccnm3t5nxg9kF9a/5a/4m5w+8AvxVd1fnWzP9cNYAAOjtXJ8CvgZ8D1hVSq/Z+jzt543StnYCZ85eZhfg8HHTFew56XqmMqeW9LvZ3H5OO/TvnDz0S5wyb7EEARx8s4Z9v6lnajRdWv+av+ZvcP7Ae8A9wKPdXZ0nHjpMCzW03s71aeBKCoeE3cBs3yh8wM36PadfNHx+21kT65yIPm0gwGWw7kIONX6O4drzyaebZ3xdOj9I4/g2Thp+geax13Aieqdz4BfKwsO7ahjZkyU/6c7cf7VHw2lTtK6eoGnFETT/SLrX/HE52PwnO95v+9o2z22c8/oDeoCfUHjQZ97DhLKyqbdz/XKgAyh+XfEQsHNj//YPAQ4/fNKWTFXw+XLans1I9dnsb72GAMil25jMtBM4GaBwulud20cmf7C8CZUgCCA37nJkOEUwWTgrdaozVDX6ZGq9stM+dP+YmX/9xA7aB342Pf8UR4bTeFOF3txsQFVjnkytj+PAvpYvMVqzLpZxVMK//6mH/4uGyTci7TeXadja+te7rwTo6euf8frr7uos+Z29pdU106Yv9Fk7c6uiP0WdyrRxuKFr1p+Pplsi73NWjUD7sX8U682bEBKZ/8DPcBzI1vlk62Y/zR6tWTfnv1UcFtO/f8vIizAZbZeuP3b0f09f6JG8jT+WjwSL816qiI2cmN4wpM8EFLGYAkDEYgoAEYspAEQspgAQsZgCQMRiCgARiykARCxW1pOAi90//WaC3x8092ze35xbxwWnzPy8+PFu6zH2xUwAPNQdyTu+j1XCc2Cm5x/WhW1TfPW8tpCvjvuB5OioAhCxmAJAxGIKABGLKQBELKYAELGYAkDEYgoAEYvFEwCVcxtUpDLEdE3FEwCqK0SiFdM1FcuTgEFdkI/oA1mPytQ7NNeGi8Hammrc6oV9nvtC1NfX09yUCfVat9rId8MfFfrv1HcIGsI94ldb7+CHbLextjIeRm2sS4X+u8rUQxDxt/0GbjxfFxTP3/7JwXjgRvsXUNtYz8ozwn3SbNu+IapzyX/ne1H7skZWnlEd6rXVzeaCCmBlx2yfMH0sZ2gngTvrx8sfo23FaZzUFO7fynv1QKjXmZY9pYqVHU3zvxBwM/UEw+H+rkLzGI+2wQJtAUQqQUzXlA4BRSpBRR0CikhFUACIWEwBIGIxBYCIxRQAIhZTAIhYTAEgYjEFgIjFFAAiFlMAiFhMASBiMQWAiMUUACIWUwCIWEwBIGIxBYCIxRQAIhZTAIhYrDI+khXArQ/90u9tCPfhjYvB1hvCfSincakG0yOQGKgCELGYAkDEYgoAEYspAEQspgAQsZgCQMRiCgARiykARCymABCxWOU8CVjC16PvOJjj43EvxsHMbV1bhpNr3VCvfeH9yZhHM7fPhfwac4Jc+Ead8P9Zda2oCt+uQWtaM6aHEIvKCQA//IXy1Jvj9H1wJMbBzO2uzzZy8hnhAuDeXw3HPJq5hQ+AEoLKqQn90kp5bHss55seQiy0BRCxmAJAxGIKABGLKQBELKYAELGYAkDEYgoAEYspAEQspgAQsVjlPAkolSOYCP3Se14ainEg0VnTmuG6dbWmhxE5BYBEr4T3bZh8ZFu0BRCxmgJAxGIKABGLKQBELKYAELGYAkDEYgoAEYspAEQspgAQsdiSfBJw4ON9jO0bMNb/8EgHEO7DNsf27Yp3MPM6xWjv5ucfzkB1C1AZH2BaClUAIhZTAIhYTAEgYjEFgIjFFAAiFlMAiFhMASBisVgCIAjiaFXEXnFdU/EEgAoLkUjFdU3F8iTgWL6loSFzKI6mQzm7vd5Y3wDNtdnQXyd90aqWmEcjS8F4vqUBon+6NfIA+M//uGvD4an+K0wGwNcvPt1Y36V64Jq1pocgFeDQ1Mornn7q2g1fvPaBl6JsN9K64pEn/rlm3+TZjwJulO2KCO5HE+c++qN/e7AmykYjDYB8UHOPT3pNlG2KSIFPZs2Y13pPlG1GFgAPP/7EBuDbUbUnIjNxvj19rUUikgB4+PEnagCV/iLxc4FHp6+5BYuqArgHUOkvkow1FK65BVtwAKj0FzEikq3AggJApb+IMZFsBRZaAaj0FzFnwVuBsgNApb/IorCgrUBZTwKaKP2d8V/jvv+NpLqT4+X2mB6BzKy4FTj/m5tumij1l8t9FDjx0t/J78UZ/kWSXYpUiuJW4G9L/cWStwAq/UUWpbK2AiUFgE79RRatsu4KlFoB6NRfZPEq+a5A6ABQ6S9SEUraCoQKAJX+IhWjpK1A2ApApb9I5Qi9FZg3AFT6i1SkUFuBOQNApb9IxQq1FZivAlDpL1K55t0KOLP9YLp8eB6t/iKVzAMu/eamm2b8MNEZA2C6bNiGVn+RpeAtYMb3Csy2BVDpL7J0zLoVOKECUOkvsiTNuBU4JgBU+ossaSdsBY7fAqj0F1m6TtgKHK0AVPqLWOGYrYADKv1FLHN0K5ACCIJApb+IPdZMX/M4//ijxzZkMhmV/iJ28fK53KXpfC73Qy+fHzU9GhFJVhAEP0yPDA1dYHogImLEBZF+PbiIVBYFgIjFFAAiFlMAiFhMASBiMQWAiMUUACIWUwCIWEwBIGKxNPCXpgchIiIiIiIiIiIiIiIiIiIiIiIiIiIipfp/pkDmBzP6KNsAAAAASUVORK5CYII=" alt="logo" style="width:22px;height:22px;object-fit:contain;display:inline-block;vertical-align:middle;" />MagPro Vendeur</h3>
+                            <span class="inline-block mt-1 bg-blue-100 text-blue-800 text-[10px] sm:text-xs font-bold px-3 py-1 rounded-md" dir="ltr">v<span id="ver_flotte"></span></span>
+                        </div>
+                    </div>
+                    <p class="text-[10px] sm:text-xs text-gray-400 mb-4 flex items-center font-medium"><i class="fa-regular fa-calendar me-2"></i> <span id="date_flotte"></span></p>
+                    <p data-i18n="app1_desc" class="text-gray-600 text-xs sm:text-base mb-6 sm:mb-8 flex-grow leading-relaxed">L'application connectée au PC. Pour les vendeurs sur terrain (Van Selling). Inclut GPS, facturation hors-ligne et requêtes de stock.</p>
+                    <a id="apkFlotteBtn" href="#" class="w-full block text-center bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 font-bold py-3 sm:py-4 rounded-xl transition text-sm sm:text-base shadow-sm min-h-[48px] flex items-center justify-center">
+                        <i class="fa-brands fa-android me-2 text-lg"></i> <span data-i18n="btn_download_apk">Télécharger APK</span>
+                    </a>
+                </div>
+
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-lg border-t-8 border-orange-500 transition hover-lift flex flex-col h-full relative group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-orange-50 text-orange-600 flex items-center justify-center rounded-2xl text-xl sm:text-2xl shrink-0 group-hover:bg-orange-600 group-hover:text-white transition shadow-sm">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h3 data-i18n="app2_title" class="font-bold text-gray-900 leading-tight text-[13px] sm:text-sm whitespace-nowrap" dir="ltr" style="display:flex;align-items:center;gap:5px;"><img src="data:image/png;base64,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" alt="logo" style="width:22px;height:22px;object-fit:contain;display:inline-block;vertical-align:middle;" />MagPro Scale</h3>
+                            <span class="inline-block mt-1 bg-orange-100 text-orange-800 text-[10px] sm:text-xs font-bold px-3 py-1 rounded-md" dir="ltr">v<span id="ver_scale"></span></span>
+                        </div>
+                    </div>
+                    <p class="text-[10px] sm:text-xs text-gray-400 mb-4 flex items-center font-medium"><i class="fa-regular fa-calendar me-2"></i> <span id="date_scale"></span></p>
+                    <p data-i18n="app2_desc" class="text-gray-600 text-xs sm:text-base mb-6 sm:mb-8 flex-grow leading-relaxed">Transformez un Smartphone Android en balance connectée au stock. Calcule les prix au gramme et imprime des étiquettes codes-barres.</p>
+                    <a id="apkScaleBtn" href="#" class="w-full block text-center bg-orange-50 hover:bg-orange-600 hover:text-white text-orange-700 font-bold py-3 sm:py-4 rounded-xl transition text-sm sm:text-base shadow-sm min-h-[48px] flex items-center justify-center">
+                        <i class="fa-brands fa-android me-2 text-lg"></i> <span data-i18n="btn_download_apk">Télécharger APK</span>
+                    </a>
+                </div>
+
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-lg border-t-8 border-red-500 transition hover-lift flex flex-col h-full relative group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-red-50 text-red-600 flex items-center justify-center rounded-2xl text-xl sm:text-2xl shrink-0 group-hover:bg-red-600 group-hover:text-white transition shadow-sm">
+                            <i class="fa-solid fa-bell-concierge"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h3 data-i18n="app3_title" class="font-bold text-gray-900 leading-tight text-[13px] sm:text-sm whitespace-nowrap" dir="ltr" style="display:flex;align-items:center;gap:5px;"><img src="data:image/png;base64,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" alt="logo" style="width:22px;height:22px;object-fit:contain;display:inline-block;vertical-align:middle;" />MagPro Resto</h3>
+                            <span class="inline-block mt-1 bg-red-100 text-red-800 text-[10px] sm:text-xs font-bold px-3 py-1 rounded-md" dir="ltr">v<span id="ver_resto"></span></span>
+                        </div>
+                    </div>
+                    <p class="text-[10px] sm:text-xs text-gray-400 mb-4 flex items-center font-medium"><i class="fa-regular fa-calendar me-2"></i> <span id="date_resto"></span></p>
+                    <p data-i18n="app3_desc" class="text-gray-600 text-xs sm:text-base mb-6 sm:mb-8 flex-grow leading-relaxed">Prise de commande mobile pour les serveurs. Envoie direct en cuisine, gestion des tables et division des additions.</p>
+                    <a id="apkRestoBtn" href="#" class="w-full block text-center bg-red-50 hover:bg-red-600 hover:text-white text-red-700 font-bold py-3 sm:py-4 rounded-xl transition text-sm sm:text-base shadow-sm min-h-[48px] flex items-center justify-center">
+                        <i class="fa-brands fa-android me-2 text-lg"></i> <span data-i18n="btn_download_apk">Télécharger APK</span>
+                    </a>
+                </div>
+
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-lg border-t-8 border-purple-500 transition hover-lift flex flex-col h-full relative group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-purple-50 text-purple-600 flex items-center justify-center rounded-2xl text-xl sm:text-2xl shrink-0 group-hover:bg-purple-600 group-hover:text-white transition shadow-sm">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h3 data-i18n="app4_title" class="font-bold text-gray-900 leading-tight text-[13px] sm:text-sm whitespace-nowrap" dir="ltr" style="display:flex;align-items:center;gap:5px;"><img src="data:image/png;base64,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" alt="logo" style="width:22px;height:22px;object-fit:contain;display:inline-block;vertical-align:middle;" />MagPro Standalone</h3>
+                            <span class="inline-block mt-1 bg-purple-100 text-purple-800 text-[10px] sm:text-xs font-bold px-3 py-1 rounded-md" dir="ltr">v<span id="ver_standalone"></span></span>
+                        </div>
+                    </div>
+                    <p class="text-[10px] sm:text-xs text-gray-400 mb-4 flex items-center font-medium"><i class="fa-regular fa-calendar me-2"></i> <span id="date_standalone"></span></p>
+                    <p data-i18n="app4_desc" class="text-gray-600 text-xs sm:text-base mb-6 sm:mb-8 flex-grow leading-relaxed">Une solution 100% indépendante. Gère le stock, les achats et les ventes localement sur le Smartphone.</p>
+                    <a id="apkStandaloneBtn" href="#" class="w-full block text-center bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-700 font-bold py-3 sm:py-4 rounded-xl transition text-sm sm:text-base shadow-sm min-h-[48px] flex items-center justify-center">
+                        <i class="fa-brands fa-android me-2 text-lg"></i> <span data-i18n="btn_download_apk">Télécharger APK</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="install-guide" class="py-16 sm:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12 sm:mb-20 animate-fade-in-up">
+                <h2 data-i18n="inst_title" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4">Guide d'Installation et de Mise à Jour</h2>
+                <p data-i18n="inst_desc" class="text-gray-500 text-sm sm:text-lg lg:text-xl max-w-2xl mx-auto">Découvrez comment installer et mettre à jour le logiciel MagPro en toute simplicité.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10">
+                <div class="bg-blue-50/30 p-6 sm:p-12 rounded-3xl border border-blue-100 hover-lift shadow-sm flex flex-col">
+                    <div class="flex items-center gap-4 sm:gap-5 mb-6 sm:mb-8">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-lg shrink-0">
+                            <i class="fa-solid fa-download"></i>
+                        </div>
+                        <h3 data-i18n="inst_new_title" class="text-xl sm:text-3xl font-bold text-gray-900">Nouvelle Installation</h3>
+                    </div>
+                    <p data-i18n="inst_new_desc" class="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-lg leading-relaxed">Lors de la première installation, le setup vous offre les choix suivants :</p>
+                    <div class="space-y-6 sm:space-y-8">
+                        <div>
+                            <h4 data-i18n="inst_mode_title" class="font-extrabold text-blue-700 mb-3 sm:mb-4 text-base sm:text-xl">1. Mode du Programme :</h4>
+                            <ul class="space-y-3 sm:space-y-4 text-sm sm:text-lg text-gray-700 font-medium">
+                                <li class="flex items-start gap-3"><i class="fa-solid fa-box text-blue-500 mt-1 sm:mt-1.5 text-lg sm:text-xl shrink-0"></i> <span data-i18n="inst_mode_stock">Gestion de Stock : Dédié aux commerces et points de vente.</span></li>
+                                <li class="flex items-start gap-3"><i class="fa-solid fa-utensils text-blue-500 mt-1 sm:mt-1.5 text-lg sm:text-xl shrink-0"></i> <span data-i18n="inst_mode_resto">Restaurant : Optimisé pour la gestion des restaurants et cafés.</span></li>
+                            </ul>
+                        </div>
+                        <div class="pt-6 border-t border-blue-100">
+                            <h4 data-i18n="inst_type_title" class="font-extrabold text-blue-700 mb-3 sm:mb-4 text-base sm:text-xl">2. Type d'installation :</h4>
+                            <ul class="space-y-3 sm:space-y-4 text-sm sm:text-lg text-gray-700 font-medium">
+                                <li class="flex items-start gap-3"><i class="fa-solid fa-server text-blue-500 mt-1 sm:mt-1.5 text-lg sm:text-xl shrink-0"></i> <span data-i18n="inst_type_server">Serveur : Installe la base de données Firebird et les fichiers centraux sur le poste principal.</span></li>
+                                <li class="flex items-start gap-3"><i class="fa-solid fa-desktop text-blue-500 mt-1 sm:mt-1.5 text-lg sm:text-xl shrink-0"></i> <span data-i18n="inst_type_client">Client : Connecte le poste secondaire au serveur via son adresse IP.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-6 border-t border-blue-100">
+                        <div class="relative w-full rounded-2xl overflow-hidden shadow-md" style="padding-bottom:56.25%;">
+                            <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/pscS_GwxoGE?si=Rs_7OghwjD_f-MWG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-green-50/30 p-6 sm:p-12 rounded-3xl border border-green-100 hover-lift shadow-sm flex flex-col">
+                    <div class="flex items-center gap-4 sm:gap-5 mb-6 sm:mb-8">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-green-500 text-white rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-lg shrink-0">
+                            <i class="fa-solid fa-rotate"></i>
+                        </div>
+                        <h3 data-i18n="inst_up_title" class="text-xl sm:text-3xl font-bold text-gray-900">Mise à Jour (Update)</h3>
+                    </div>
+                    <p data-i18n="inst_up_desc" class="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-lg leading-relaxed">En choisissant 'Mise à jour', le programme d'installation va :</p>
+                    <ul class="space-y-4 sm:space-y-6 text-sm sm:text-lg text-gray-700 font-medium">
+                        <li class="flex items-start gap-4 p-4 bg-white rounded-2xl shadow-sm border border-green-50">
+                            <i class="fa-solid fa-shield-halved text-green-500 mt-1 text-xl sm:text-2xl shrink-0"></i>
+                            <span data-i18n="inst_up_1">Sauvegarder en toute sécurité votre fichier de configuration et votre base de données.</span>
+                        </li>
+                        <li class="flex items-start gap-4 p-4 bg-white rounded-2xl shadow-sm border border-green-50">
+                            <i class="fa-solid fa-trash-can-arrow-up text-green-500 mt-1 text-xl sm:text-2xl shrink-0"></i>
+                            <span data-i18n="inst_up_2">Nettoyer les anciens fichiers et déployer la nouvelle version automatiquement.</span>
+                        </li>
+                        <li class="flex items-start gap-4 p-4 bg-white rounded-2xl shadow-sm border border-green-50">
+                            <i class="fa-solid fa-network-wired text-green-500 mt-1 text-xl sm:text-2xl shrink-0"></i>
+                            <span data-i18n="inst_up_3">Aucune reconfiguration réseau ou serveur n'est requise.</span>
+                        </li>
+                    </ul>
+                    <div class="mt-auto pt-6 border-t border-green-100">
+                        <div class="relative w-full rounded-2xl overflow-hidden shadow-md" style="padding-bottom:56.25%;">
+                            <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/fadOU21j1fc?si=UJinF209vyZbkWko" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 sm:mt-16 bg-gray-900 rounded-3xl p-6 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6 border border-gray-800 shadow-xl animate-fade-in-up">
+                <div class="flex items-center gap-4 sm:gap-6 text-start">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-red-600/20 rounded-2xl flex items-center justify-center shrink-0">
+                        <i class="fa-brands fa-youtube text-red-500 text-2xl sm:text-3xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-red-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1"><span data-i18n="yt_badge">Chaîne YouTube Officielle</span></p>
+                        <h3 data-i18n="yt_title" class="text-white text-base sm:text-xl font-extrabold leading-tight mb-1" style="display:flex;align-items:center;gap:8px;"><img src="data:image/png;base64,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" alt="logo" style="width:22px;height:22px;object-fit:contain;display:inline-block;vertical-align:middle;" />MagPro — Tutoriels & Guides</h3>
+                        <p data-i18n="yt_desc_short" class="text-gray-400 text-xs sm:text-sm leading-relaxed">Toutes les démonstrations et guides du logiciel disponibles sur notre chaîne.</p>
+                    </div>
+                </div>
+                <a href="https://www.youtube.com/@magpro-officiel" target="_blank" rel="noopener" class="inline-flex items-center gap-3 bg-red-600 hover:bg-red-500 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-bold text-sm sm:text-base transition hover:-translate-y-1 shrink-0 w-full sm:w-auto justify-center min-h-[48px]" style="animation: yt-btn-pulse 2s ease-in-out infinite;">
+                    <i class="fa-brands fa-youtube text-xl sm:text-2xl"></i>
+                    <span data-i18n="yt_btn">Visiter la Chaîne</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="bg-gray-900 text-gray-300 py-16 sm:py-24 border-t-8 border-blue-600">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16">
+            <div class="text-center md:text-start">
+                <div class="flex items-center justify-center md:justify-start gap-3 mb-6 sm:mb-8 footer-logo-wrap">
+                    <img src="data:image/png;base64,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" alt="logo" style="width:48px;height:48px;object-fit:contain;display:inline-block;vertical-align:middle;" />
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Mag<span class="text-blue-500">Pro</span></h2>
+                </div>
+                <p data-i18n="foot_desc" class="mb-8 opacity-90 text-sm sm:text-lg max-w-lg mx-auto md:mx-0 leading-relaxed font-medium">L'écosystème logiciel Algérien conçu pour simplifier votre quotidien, de la caisse jusqu'à votre Smartphone.</p>
+            </div>
+            <div class="text-center md:text-start bg-gray-800/50 p-6 sm:p-8 rounded-3xl border border-gray-700">
+                <h3 data-i18n="foot_contact" class="text-2xl sm:text-3xl font-extrabold text-white mb-6 sm:mb-8 border-b border-gray-700 pb-4 inline-block md:block">Contactez-nous</h3>
+                <ul class="space-y-4 sm:space-y-6 text-sm sm:text-lg font-medium">
+                    <li class="flex items-center justify-center md:justify-start gap-4 group">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-800 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition shrink-0">
+                            <i class="fa-solid fa-phone text-blue-400 group-hover:text-white transition text-lg sm:text-xl"></i>
+                        </div>
+                        <a id="footerPhone" href="#" class="hover:text-white transition tracking-wider" dir="ltr"></a>
+                    </li>
+                    <li class="flex items-center justify-center md:justify-start gap-4 group">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-800 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition shrink-0">
+                            <i class="fa-brands fa-facebook-f text-blue-400 group-hover:text-white transition text-lg sm:text-xl"></i>
+                        </div>
+                        <a id="footerFbLink" href="#" target="_blank" rel="noopener" class="hover:text-white transition" dir="ltr">Page Facebook</a>
+                    </li>
+                    <li class="flex items-center justify-center md:justify-start gap-4">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-800 rounded-full flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-location-dot text-blue-400 text-lg sm:text-xl"></i>
+                        </div>
+                        <span data-i18n="foot_loc" class="text-gray-300">Skikda, Algérie</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-12 sm:mt-20 pt-8 border-t border-gray-700 px-4 text-center space-y-2">
+            <div class="flex items-center justify-center gap-2 text-sm sm:text-lg font-bold">
+                <span class="text-gray-300"><span data-i18n="foot_copy1">Développé par</span></span>
+                <span style="background:linear-gradient(90deg,#60a5fa,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:900;font-size:1.1rem;" class="whitespace-nowrap"><span id="devName">R.SEIFEDDINE</span></span>
+            </div>
+            <div class="flex items-center justify-center gap-2 text-sm sm:text-base font-semibold text-gray-400">
+                <span><span data-i18n="foot_copy2">Tous droits réservés.</span></span>
+                <span dir="ltr">&copy; <span id="year"></span></span>
+            </div>
+        </div>
+    </footer>
+
+    <button onclick="scrollToTop()" id="backToTop" class="fixed bottom-6 end-6 sm:bottom-8 sm:end-8 bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.5)] transition z-50 focus:outline-none hover:-translate-y-1">
+        <i class="fa-solid fa-arrow-up text-lg sm:text-2xl"></i>
+    </button>
+
+    <div id="featureModal" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden modal-content border border-gray-100 max-h-[90vh] flex flex-col">
+            <div class="p-6 sm:p-10 overflow-y-auto">
+                <div class="text-center mb-6 sm:mb-8">
+                    <div id="modalIconBg"><i id="modalIcon"></i></div>
+                    <h3 id="modalTitle" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 sm:mb-3"></h3>
+                    <p id="modalDesc" class="text-gray-600 text-sm sm:text-lg leading-relaxed"></p>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-4 sm:p-8 border border-gray-100 shadow-inner">
+                    <ul id="modalPoints" class="space-y-3 sm:space-y-5 font-medium"></ul>
+                </div>
+                <div class="mt-8 sm:mt-10 text-center">
+                    <button onclick="closeFeatureModal()" class="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 sm:px-10 sm:py-4 rounded-2xl font-bold transition shadow-lg w-full sm:w-auto text-base sm:text-lg hover:-translate-y-1 min-h-[48px]">
+                        <span data-i18n="modal_close">Fermer</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        document.getElementById('app-version').innerText = APP_DATA.VERSION;
-        document.getElementById('app-date').innerText = APP_DATA.DATE;
-        document.getElementById('download-btn').href = APP_DATA.LINK;
-        const months = { 'janvier': 0, 'février': 1, 'mars': 2, 'avril': 3, 'mai': 4, 'juin': 5, 'juillet': 6, 'août': 7, 'septembre': 8, 'octobre': 9, 'novembre': 10, 'décembre': 11 };
-        try {
-            const parts = APP_DATA.DATE.toLowerCase().split(' ');
-            if (parts.length >= 3) {
-                const day = parseInt(parts[0], 10);
-                const month = months[parts[1]];
-                const year = parseInt(parts[2], 10);
-                if (!isNaN(day) && month !== undefined && !isNaN(year)) {
-                    const updateDate = new Date(year, month, day);
-                    const today = new Date();
-                    const diffDays = (today - updateDate) / (1000 * 60 * 60 * 24);
-                    if (diffDays <= 30) {
-                        document.getElementById('fire-icon').innerHTML = '<span class="text-orange-500 animate-pulse text-sm ml-1" title="Mise à jour récente">🔥</span>';
-                    }
-                }
+        window.winFireHtml = '';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations.ar[key]) el.innerHTML = translations.ar[key];
+            });
+            document.getElementById('langToggleBtn').innerText = 'Français';
+            document.body.style.visibility = 'visible';
+
+            document.querySelectorAll('.win-version').forEach(el => el.innerText = APP_CONFIG.WINDOWS.VERSION);
+
+            window.winFireHtml = getFireIconHTML(APP_CONFIG.WINDOWS.DATE);
+            const winDateEl = document.getElementById('win-date');
+            if (winDateEl) {
+                const dateStr = currentLang === 'ar' ? APP_CONFIG.WINDOWS.DATE_AR : APP_CONFIG.WINDOWS.DATE;
+                winDateEl.innerHTML = (currentLang === 'ar' ? 'تم التحديث في: ' : 'Mise à jour le : ') + dateStr + window.winFireHtml;
             }
-        } catch(e) { console.error("Error parsing date for fire icon", e); }
+
+            const dlBtn = document.getElementById('mainDownloadBtn');
+            if (dlBtn) dlBtn.href = APP_CONFIG.WINDOWS.LINK;
+
+            document.getElementById('ver_flotte').innerText = APP_CONFIG.ANDROID.FLOTTE.VERSION;
+            document.getElementById('date_flotte').innerHTML = (currentLang === 'ar' ? APP_CONFIG.ANDROID.FLOTTE.DATE_AR : APP_CONFIG.ANDROID.FLOTTE.DATE) + getFireIconHTML(APP_CONFIG.ANDROID.FLOTTE.DATE);
+            document.getElementById('apkFlotteBtn').href = APP_CONFIG.ANDROID.FLOTTE.LINK;
+
+            document.getElementById('ver_scale').innerText = APP_CONFIG.ANDROID.SCALE.VERSION;
+            document.getElementById('date_scale').innerHTML = (currentLang === 'ar' ? APP_CONFIG.ANDROID.SCALE.DATE_AR : APP_CONFIG.ANDROID.SCALE.DATE) + getFireIconHTML(APP_CONFIG.ANDROID.SCALE.DATE);
+            document.getElementById('apkScaleBtn').href = APP_CONFIG.ANDROID.SCALE.LINK;
+
+            document.getElementById('ver_resto').innerText = APP_CONFIG.ANDROID.RESTO.VERSION;
+            document.getElementById('date_resto').innerHTML = (currentLang === 'ar' ? APP_CONFIG.ANDROID.RESTO.DATE_AR : APP_CONFIG.ANDROID.RESTO.DATE) + getFireIconHTML(APP_CONFIG.ANDROID.RESTO.DATE);
+            document.getElementById('apkRestoBtn').href = APP_CONFIG.ANDROID.RESTO.LINK;
+
+            document.getElementById('ver_standalone').innerText = APP_CONFIG.ANDROID.STANDALONE.VERSION;
+            document.getElementById('date_standalone').innerHTML = (currentLang === 'ar' ? APP_CONFIG.ANDROID.STANDALONE.DATE_AR : APP_CONFIG.ANDROID.STANDALONE.DATE) + getFireIconHTML(APP_CONFIG.ANDROID.STANDALONE.DATE);
+            document.getElementById('apkStandaloneBtn').href = APP_CONFIG.ANDROID.STANDALONE.LINK;
+
+            const phoneEl = document.getElementById('footerPhone');
+            if (phoneEl) {
+                phoneEl.innerText = APP_CONFIG.CONTACT.PHONE;
+                phoneEl.href = `tel:${APP_CONFIG.CONTACT.PHONE.replace(/\s/g, '')}`;
+            }
+
+            const fbFoot = document.getElementById('footerFbLink');
+            if (fbFoot) fbFoot.href = APP_CONFIG.CONTACT.FACEBOOK;
+
+            document.getElementById('year').innerText = new Date().getFullYear();
+            document.getElementById('devName').innerText = 'ر.سيف الدين';
+
+            document.getElementById('featureModal').addEventListener('click', function (e) {
+                if (e.target === this) closeFeatureModal();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !document.getElementById('featureModal').classList.contains('hidden')) {
+                    closeFeatureModal();
+                }
+            });
+        });
     </script>
+
 </body>
 </html>
