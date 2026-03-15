@@ -2953,7 +2953,7 @@ class StockApp(MDApp):
         y = draw_text_line(f'Date: {ts_str}', y, font_reg, 'left')
         user_str = transaction_data.get('user_name', self.current_user_name)
         if user_str and user_str != 'ADMIN':
-            y = draw_text_line(f'User: {user_str}', y, font_reg, 'left')
+            y = draw_text_line(f'Caissier: {user_str}', y, font_reg, 'left')
         if is_transfer:
             label_entity = 'Trajet'
             loc = transaction_data.get('purchase_location') or transaction_data.get('location') or 'store'
@@ -3081,7 +3081,7 @@ class StockApp(MDApp):
         try:
             adapter = BluetoothAdapter.getDefaultAdapter()
             if not adapter or not adapter.isEnabled():
-                self.notify('Bluetooth OFF', 'error')
+                self.notify('Bluetooth désactivé', 'error')
                 return
             device = adapter.getRemoteDevice(target_mac)
             uuid = UUID.fromString('00001101-0000-1000-8000-00805F9B34FB')
@@ -3213,7 +3213,7 @@ class StockApp(MDApp):
     def show_zoomed_image(self, image_path, title='Image'):
         from kivymd.uix.fitimage import FitImage
         if not image_path or not os.path.exists(image_path):
-            self.notify('الصورة غير متوفرة', 'error')
+            self.notify('Image non disponible', 'error')
             return
         content = MDBoxLayout(orientation='vertical', padding=0, spacing=0, size_hint_y=None, height=dp(400))
         img = FitImage(source=image_path, radius=[10, 10, 0, 0], size_hint=(1, 1), mipmap=True)
@@ -6055,7 +6055,9 @@ class StockApp(MDApp):
                 self.stat_supplier_payments = float(current_s_pay)
                 self.calculate_net_total()
                 self.save_local_stats()
-            self.notify('Enregistré مع succès', 'success')
+                
+            self.notify('Enregistré avec succès', 'success')
+            
             try:
                 if self.db.get_setting('printer_auto', 'False') == 'True' and self.db.get_setting('printer_mac', ''):
                     threading.Thread(target=self.print_ticket_bluetooth, args=(data,), daemon=True).start()
@@ -7064,22 +7066,27 @@ class StockApp(MDApp):
         if platform == 'android':
             try:
                 from jnius import autoclass
-                PythonActivity = autoclass('org.kivy.android.PythonActivity')
-                currentActivity = PythonActivity.mActivity
-                file_dir = currentActivity.getExternalFilesDir(None)
-                if file_dir:
-                    backup_dir = os.path.join(file_dir.getAbsolutePath(), 'MagPro_Backups')
-                else:
-                    backup_dir = os.path.join(self.user_data_dir, 'Backups')
+                Environment = autoclass('android.os.Environment')
+                # حفظ الملفات في مجلد التحميلات العام لكي يراها المستخدم بسهولة
+                public_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()
+                backup_dir = os.path.join(public_dir, 'MagPro_Backups')
             except Exception as e:
-                print(f'Error getting android dir: {e}')
-                backup_dir = os.path.join(self.user_data_dir, 'Backups')
+                print(f'Error getting android public dir: {e}')
+                try:
+                    from jnius import autoclass
+                    PythonActivity = autoclass('org.kivy.android.PythonActivity')
+                    context = PythonActivity.mActivity
+                    file_dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                    backup_dir = os.path.join(file_dir.getAbsolutePath(), 'MagPro_Backups')
+                except Exception as e2:
+                    backup_dir = os.path.join(self.user_data_dir, 'Backups')
         else:
             home = os.path.expanduser('~')
             backup_dir = os.path.join(home, 'Downloads', 'MagPro_Backups')
+            
         if not os.path.exists(backup_dir):
             try:
-                os.makedirs(backup_dir)
+                os.makedirs(backup_dir, exist_ok=True)
             except OSError as e:
                 print(f'Error creating directory: {e}')
                 return self.user_data_dir
@@ -7087,6 +7094,8 @@ class StockApp(MDApp):
 
     def _rotate_backups(self, backup_dir, limit=30):
         try:
+            if not os.path.exists(backup_dir):
+                return
             files = []
             for f in os.listdir(backup_dir):
                 if f.startswith('Backup_Auto_') and f.endswith('.zip'):
@@ -7110,22 +7119,56 @@ class StockApp(MDApp):
                 filename = f"Backup_Auto_{datetime.now().strftime('%Y-%m-%d')}.zip"
             else:
                 filename = f"MagPro_Backup_{datetime.now().strftime('%Y-%m-%d_%H-%M')}.zip"
+                
             backup_path = os.path.join(backup_dir, filename)
+            
             if not os.path.exists(backup_dir):
-                os.makedirs(backup_dir)
+                os.makedirs(backup_dir, exist_ok=True)
+                
             if os.path.exists(backup_path):
                 try:
                     os.remove(backup_path)
                 except:
                     pass
+                    
             temp_db_source = os.path.join(self.user_data_dir, 'temp_backup_source.db')
             if os.path.exists(temp_db_source):
-                os.remove(temp_db_source)
-            if self.db and self.db.conn:
-                self.db.conn.execute(f"VACUUM INTO '{temp_db_source}'")
-            else:
-                self.db.connect()
-                self.db.conn.execute(f"VACUUM INTO '{temp_db_source}'")
+                try:
+                    os.remove(temp_db_source)
+                except:
+                    pass
+            
+            db_copied = False
+            try:
+                if self.db and self.db.conn:
+                    self.db.conn.execute(f"VACUUM INTO '{temp_db_source}'")
+                else:
+                    self.db.connect()
+                    self.db.conn.execute(f"VACUUM INTO '{temp_db_source}'")
+                db_copied = True
+            except Exception as vacuum_err:
+                print(f"[WARN] VACUUM INTO failed ({vacuum_err}), falling back to shutil")
+                try:
+                    if self.db:
+                        self.db.clean_up_wal()
+                    import shutil
+                    if platform == 'android':
+                        from jnius import autoclass
+                        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+                        files_dir = PythonActivity.mActivity.getFilesDir().getAbsolutePath()
+                        real_db_path = os.path.join(files_dir, AppConstants.DB_NAME)
+                    else:
+                        app_dir = os.path.dirname(os.path.abspath(__file__))
+                        real_db_path = os.path.join(app_dir, AppConstants.DB_NAME)
+                    
+                    shutil.copy2(real_db_path, temp_db_source)
+                    db_copied = True
+                except Exception as copy_err:
+                    print(f"[ERROR] DB Copy failed: {copy_err}")
+            
+            if not db_copied:
+                raise Exception("Impossible de copier la base de données.")
+
             import zipfile
             with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 zipf.write(temp_db_source, arcname='magpro_local.db')
@@ -7136,15 +7179,22 @@ class StockApp(MDApp):
                             file_path = os.path.join(root, file)
                             arcname = os.path.join('product_images', file)
                             zipf.write(file_path, arcname=arcname)
+                            
             if os.path.exists(temp_db_source):
-                os.remove(temp_db_source)
+                try:
+                    os.remove(temp_db_source)
+                except:
+                    pass
+                    
             if auto:
                 self._rotate_backups(backup_dir, limit=30)
+                
             if not auto:
-                self.notify(f'Sauvegarde réussie (DB+Images):\n{filename}', 'success')
+                self.notify(f'Sauvegarde réussie dans:\n{backup_dir}\n{filename}', 'success')
                 if platform != 'android':
                     import subprocess
                     subprocess.Popen(f'explorer /select,"{backup_path}"')
+                    
         except Exception as e:
             if not auto:
                 self.notify(f'Échec de la sauvegarde: {e}', 'error')
